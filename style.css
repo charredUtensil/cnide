@@ -1,0 +1,221 @@
+/* Generics and Reset */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  background: #212121;
+  color: #FFF;
+  font-family: 'Overpass Mono', monospace;
+  font-size: 14px;
+  line-height: 100%;
+}
+
+
+.hidden {
+  display: none;
+}
+
+
+/* Menu */
+.menu {
+  height: 48px;
+  line-height: 48px;
+  font-size: 24px;
+}
+.menu .btn {
+  padding-left: 20px;
+  cursor: pointer;
+}
+.editing .menu {
+  background: #00bcd4;
+  color: #FFF
+}
+.running .menu {
+  background: #4c4c4c;
+  color: #e69100;
+}
+.editing .run.btn,
+.running .edit.btn,
+.running .editor {
+  display: none;
+}
+
+
+/* Editor */
+.editor {
+  position: absolute;
+  top: 48px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow-y: scroll;
+}
+.editor > textarea {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: transparent;
+  color: #FFF;
+  border: none;
+  font-family: 'Overpass Mono', monospace;
+  font-size: 14px;
+}
+
+
+/* Network */
+.networked {
+  margin: 0 80px 2px;
+  position: relative;
+}
+.networked.network {
+  border-radius: 10px;
+  padding: 10px 5px;
+  margin: 2px;
+  background: #111;
+}
+
+
+.wires {
+  font-size: 8px;
+  line-height: 100%;
+  position: absolute;
+}
+.wires.input {
+  text-align: right;
+  top: 0;
+  right: 100%;
+  margin-right: 2em;
+}
+.wires.output {
+  bottom: 0;
+  left: 100%;
+  margin-left: 2em;
+}
+.wires > li {
+  list-style-type: none;
+}
+.wires.input > li:after {
+  content: "->";
+  position: absolute;
+  right: -2em;
+}
+.wires.output > li:before {
+  content: "->";
+  position: absolute;
+  left: -2em;
+}
+
+
+/* Combinators */
+.combinator {
+  border-radius: 5px;
+  padding: 2px 10px;
+  background: #F00;
+}
+
+
+.combinator.constant {
+  background: #610704;
+}
+.combinator.constant .values {
+  border-spacing: 0;
+  width: 100%;
+}
+.combinator.constant .values .value {
+  text-align: right;
+}
+.combinator.constant.button {
+  background: #444;
+  padding: 4px 8px;
+  border: 2px dotted #999;
+  min-height: 2em;
+  box-shadow: inset black 0 0 2em;
+}
+.combinator.constant.button:not(.active) .signal {
+  color: #526d82;
+}
+.combinator.constant.button:not(.active) .value {
+  color: #7b7b7b;
+}
+.combinator.constant.button.toggle {
+  border-color: #19b;
+}
+.combinator.constant.button.toggle.active {
+  background: #19b;
+  box-shadow: #0bd 0 0 2em;
+  border: 2px solid #0bd;
+}
+.combinator.constant.button.pulse {
+  border-color: #fd2;
+}
+.combinator.constant.button.pulse.active {
+  background: #fd2;
+  box-shadow: #fe4 0 0 2em;
+  border: 2px solid #fe4;
+}
+
+
+.combinator.arithmetic {
+  background: #28515d;
+}
+
+
+.combinator.decider {
+  background: #72561d;
+}
+
+
+.combinator.display {
+  background: #349234;
+  line-height: normal;
+  text-align: right;
+}
+.combinator.display .signal {
+  float: left;
+}
+.combinator.display .value {
+  font-size: 24px;
+}
+
+
+.networked.comment {
+  margin: 10px 0;
+  width: 100%;
+  white-space: pre-line;
+}
+.networked.comment:first-line {
+  font-size: 2em;
+  line-height: 100%;
+}
+
+
+/* Signals */
+.value {
+  color: #FFF
+}
+.signal {
+  color: #8abce2;
+}
+.signal.all {
+  color: #ff5e5e;
+}
+.signal.any {
+  color: #40bd40;
+}
+.signal.each {
+  color: #fffe31;
+}
+.operator {
+  color: #feff35;
+  font-weight: bold;
+}
