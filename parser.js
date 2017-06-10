@@ -231,7 +231,7 @@ parser = /*
         peg$c77 = "}",
         peg$c78 = peg$literalExpectation("}", false),
         peg$c79 = function(outputs, values, as) {
-              const klass = as ? as[3] : ConstantCombinator
+              const klass = as ? as[3] : network.ConstantCombinator
               return new klass(outputs, values);
             },
         peg$c80 = function(inputs, outputs, left, operator, right, outputSignal) {

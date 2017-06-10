@@ -75,7 +75,7 @@ ConstantCombinator
   = "->" _ outputs:WirePair _
     "{" _ values:KeyValue "}"
     as:(_ As _ ButtonMode)? {
-      const klass = as ? as[3] : ConstantCombinator
+      const klass = as ? as[3] : network.ConstantCombinator
       return new klass(outputs, values);
     }
 

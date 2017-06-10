@@ -28,7 +28,7 @@
       _createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6').onclick =
           () => this.emulator.run(500);
       _createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6\u25B6').onclick =
-          () => this.emulator.run(60/1000);
+          () => this.emulator.run(1000/60);
       const editorElement = _createHtmlElement(this.wrapperElement, 'div', ['editor']);
       this.textarea = _createHtmlElement(editorElement, 'textarea');
       this.textarea.value = localStorage.getItem('autosave') || '';
