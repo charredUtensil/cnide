@@ -85,6 +85,8 @@ to simulate single-tick pulses of data.
 `FOO BAR -> [iron]` will create a display showing the value of the `iron` signal from the `FOO` and `BAR` wires.
 
 ## Examples
+Copy these into the editor to try them out.
+
 ### Counter
     // Counts forever increasing by 1 each tick
     ETERNAL_LOOP -> ETERNAL_LOOP elapsed + 1 as elapsed
@@ -95,6 +97,7 @@ This is a direct implementation of the SR Latch example
 [from the wiki](https://wiki.factorio.com/Tutorial:Circuit-network_Cookbook#Latches).
 Note that if this example is run, before either button is pressed the circuit will rapidly toggle between on and off.
 This is to be expected, as the same thing will happen in Factorio if all combinators are constructed at the same time.
+
     SET   SR_ON  -> SR_OFF
       a = 0 then a as 1
     RESET SR_OFF -> SR_ON

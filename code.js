@@ -1,36 +1,23 @@
 (function(){
-  const _createHtmlElement = function(parent, tag, classList, text) {
-    const element = document.createElement(tag);
-    if (classList) {
-      for (c of classList){
-        element.classList.add(c);
-      }
-    }
-    if (text) {
-      element.appendChild(document.createTextNode(text));
-    }
-    parent.appendChild(element);
-    return element;
-  }
-  
   class Editor {
     constructor(parentElement) {
-      this.wrapperElement = _createHtmlElement(parentElement, 'div', ['editing'])
-      const menu = _createHtmlElement(this.wrapperElement, 'div', ['menu']);
-      _createHtmlElement(menu, 'a', ['edit', 'btn'], 'Run\u25B6').onclick =
+      this.wrapperElement = utils.createHtmlElement(parentElement, 'div', ['editing'])
+      const menu = utils.createHtmlElement(this.wrapperElement, 'div', ['menu']);
+      utils.createHtmlElement(menu, 'a', ['edit', 'btn'], 'Run\u25B6').onclick =
           () => this.compileAndRun();
-      _createHtmlElement(menu, 'a', ['run', 'btn'], 'Edit').onclick =
+      utils.createHtmlElement(menu, 'a', ['run', 'btn'], 'Edit').onclick =
           () => this.returnToEditMode();
-      _createHtmlElement(menu, 'a', ['run', 'btn'], '\u2759\u2759').onclick =
+      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u2759\u2759').onclick =
           () => this.emulator.pause();
-      _createHtmlElement(menu, 'a', ['run', 'btn'], '\u2759\u25B6').onclick =
+      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u2759\u25B6').onclick =
           () => this.emulator.step();
-      _createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6').onclick =
+      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6').onclick =
           () => this.emulator.run(500);
-      _createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6\u25B6').onclick =
+      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6\u25B6').onclick =
           () => this.emulator.run(1000/60);
-      const editorElement = _createHtmlElement(this.wrapperElement, 'div', ['editor']);
-      this.textarea = _createHtmlElement(editorElement, 'textarea');
+      const editorElement = utils.createHtmlElement(
+          this.wrapperElement, 'div', ['editor']);
+      this.textarea = utils.createHtmlElement(editorElement, 'textarea');
       this.textarea.value = localStorage.getItem('autosave') || '';
       this.emulator = null;
     }
@@ -68,7 +55,6 @@
   
   class Emulator {
     constructor(code, parentElement) {
-      this.tick = 0;
       this.interval = 0;
       this.network = parser.parse(code);
       parentElement.appendChild(
@@ -76,7 +62,6 @@
     };
   
     _step() {
-      this.tick++;
       this.network.step();
     };
   
@@ -99,7 +84,7 @@
     
     remove() {
       this.pause();
-      this.network.getDomElement().remove();
+      this.network.getDomElement(null).remove();
     };
   }
   

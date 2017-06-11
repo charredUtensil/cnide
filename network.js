@@ -1,18 +1,4 @@
 (function(){
-  const _createHtmlElement = function(parent, tag, classList, text) {
-    const element = document.createElement(tag);
-    if (classList) {
-      for (c of classList){
-        element.classList.add(c);
-      }
-    }
-    if (typeof text != 'undefined') {
-      element.appendChild(document.createTextNode(text));
-    }
-    parent.appendChild(element);
-    return element;
-  };
-
   const _htmlClassListForSignal = function(signal) {
     if (signal == 'all' || signal == 'any' || signal == 'each') {
       return ['signal', signal];
@@ -21,7 +7,7 @@
     } else {
       return ['value'];
     }
-  };
+  }
   
   const _mergeSignals = function(to, from) {
     for (const k of Object.keys(from)) {
@@ -32,34 +18,10 @@
     }
   }
   
-  const _factorioHumanize = function(value) {
-    const negate = value < 0;
-    let v = negate ? -value : value;
-    let suffixIndex = 0;
-    while (v >= 1000) {
-      v /= 1000;
-      suffixIndex++;
-    }
-    return (negate ? '-' : '') + Math.floor(v) + ['', 'K', 'M', 'G'][suffixIndex]
-  }
-  
-  class Networked {
-    getDomElement(parent) {
-      if (!this.element) {
-      	const element =
-            _createHtmlElement(parent, 'div', ['networked']);
-        this.initElement(element);
-        this.element = element;
-      }
-      return this.element;
-    }
-    
-    initElement(element) {}
-  }
-  
-  class CircuitNetwork extends Networked {
+  class CircuitNetwork extends utils.Renderable {
     constructor() {
       super();
+      this.tick = 0;
       this.state = {};
       this.children = [];
     }
@@ -69,18 +31,51 @@
     }
     
     step() {
+      this.tick++;
       const newState = {};
       for (const c of this.children) {
         c.step(this.state, newState);
       }
       this.state = newState;
+      this.renderDebugPane_();
     }
     
-    initElement(element) {
-      element.classList.add('network');
+    initElement(root) {
+      root.classList.add('network-wrapper');
+      const networkElement = utils.createHtmlElement(root, 'div', ['network']);
       for (const c of this.children) {
-        c.getDomElement(element);
+        c.getDomElement(networkElement);
       }
+      this.debugPane = utils.createHtmlElement(root, 'div', ['debug']);
+      this.renderDebugPane_();
+    }
+    
+    renderDebugPane_() {
+      this.debugPane.innerHTML = '';
+      utils.createHtmlElement(this.debugPane, 'div', ['tick'], 'Tick #' + this.tick);
+      const table = utils.createHtmlElement(this.debugPane, 'table');
+      for (const wire of Object.keys(this.state).sort()) {
+        if (Object.keys(this.state[wire]).length == 0) {
+          continue;
+        }
+        const wireTr = utils.createHtmlElement(table, 'tr', []);
+        utils.createHtmlElement(wireTr, 'th', [], wire);
+        const wireTable = utils.createHtmlElement(
+            utils.createHtmlElement(wireTr, 'td', []), 'table', []);
+        for (const k of Object.keys(this.state[wire]).sort()) {
+          const tr = utils.createHtmlElement(wireTable, 'tr', []);
+          utils.createHtmlElement(tr, 'td', ['signal'], k);
+          utils.createHtmlElement(tr, 'td', ['value'], this.state[wire][k]);
+        }
+      }
+    }
+  }
+  
+  class Networked extends utils.Renderable {
+    step(state, newState) {}
+    
+    initElement(root) {
+      root.classList.add('networked');
     }
   }
   
@@ -114,18 +109,19 @@
       }
     }
     
-    appendWireElements(element) {
-      this.appendWireElementsHelper_(element, this.inputs, 'input');
-      this.appendWireElementsHelper_(element, this.outputs, 'output');
-    }
-    
-    appendWireElementsHelper_(element, wires, io) {
+    appendWireElements_(element, wires, io) {
       if (wires) {
-        const ul = _createHtmlElement(element, 'ul', [io, 'wires']);
+        const ul = utils.createHtmlElement(element, 'ul', [io, 'wires']);
         for (const wire of wires) {
-          _createHtmlElement(ul, 'li', [], wire);
+          utils.createHtmlElement(ul, 'li', [], wire);
         }
       }
+    }
+    
+    initElement(root) {
+      super.initElement(root);
+      this.appendWireElements_(root, this.inputs, 'input');
+      this.appendWireElements_(root, this.outputs, 'output');
     }
   }
   
@@ -144,14 +140,14 @@
     }
     
     initElement(root) {
-      this.appendWireElements(root);
+      super.initElement(root);
       this.body =
-        _createHtmlElement(root, 'div', this._CombinatorCssClassList());
-      const table = _createHtmlElement(this.body, 'table', ['values']);
+        utils.createHtmlElement(root, 'div', this._CombinatorCssClassList());
+      const table = utils.createHtmlElement(this.body, 'table', ['values']);
       for (const k of Object.keys(this.values)) {
-        const tr = _createHtmlElement(table, 'tr');
-        _createHtmlElement(tr, 'td', ['signal'], k);
-        _createHtmlElement(tr, 'td', ['value'], this.values[k]);
+        const tr = utils.createHtmlElement(table, 'tr');
+        utils.createHtmlElement(tr, 'td', ['signal'], k);
+        utils.createHtmlElement(tr, 'td', ['value'], this.values[k]);
       }
     }
   }
@@ -233,18 +229,18 @@
     }
     
     initElement(root) {
-      this.appendWireElements(root);
+      super.initElement(root);
       const elem =
-          _createHtmlElement(root, 'div', ['arithmetic', 'combinator']);
-      _createHtmlElement(
+          utils.createHtmlElement(root, 'div', ['arithmetic', 'combinator']);
+      utils.createHtmlElement(
         elem, 'span', _htmlClassListForSignal(this.left), this.left);
       elem.innerHTML += ' ';
-      _createHtmlElement(elem, 'span', ['operator'], this.operator);
+      utils.createHtmlElement(elem, 'span', ['operator'], this.operator);
       elem.innerHTML += ' ';
-      _createHtmlElement(
+      utils.createHtmlElement(
         elem, 'span', _htmlClassListForSignal(this.right), this.right);
       elem.innerHTML += ' as ';
-      _createHtmlElement(
+      utils.createHtmlElement(
         elem, 'span', _htmlClassListForSignal(this.outputSignal),
         this.outputSignal);
     }
@@ -308,24 +304,24 @@
     }
     
     initElement(root) {
-      this.appendWireElements(root);
+      super.initElement(root);
       const elem =
-          _createHtmlElement(root, 'div', ['decider', 'combinator']);
-      _createHtmlElement(
+          utils.createHtmlElement(root, 'div', ['decider', 'combinator']);
+      utils.createHtmlElement(
           elem, 'span', _htmlClassListForSignal(this.left),
           this.left);
       elem.innerHTML += ' ';
-      _createHtmlElement(elem, 'span', ['operator'], this.operator);
+      utils.createHtmlElement(elem, 'span', ['operator'], this.operator);
       elem.innerHTML += ' ';
-      _createHtmlElement(
+      utils.createHtmlElement(
           elem, 'span', _htmlClassListForSignal(this.right),
           this.right);
       elem.innerHTML += ' then ';
-      _createHtmlElement(
+      utils.createHtmlElement(
           elem, 'span', _htmlClassListForSignal(this.outputSignal),
           this.outputSignal);
       elem.innerHTML += ' ';
-      _createHtmlElement(
+      utils.createHtmlElement(
           elem, 'span', ['as'], this.asOne ? 'as 1' : 'as input');
     }
   }
@@ -425,16 +421,16 @@
     getOutput(input) {
       this.value = input[this.signal] || 0;
       if (this.valueElement) {
-        this.valueElement.innerHTML = _factorioHumanize(this.value);
+        this.valueElement.innerHTML = utils.factorioHumanize(this.value);
       }
     }
     
     initElement(root) {
-      this.appendWireElements(root);
+      super.initElement(root);
       const elem =
-          _createHtmlElement(root, 'div', ['display', 'combinator']);
-      _createHtmlElement(elem, 'span', ['signal'], this.signal);
-      this.valueElement = _createHtmlElement(
+          utils.createHtmlElement(root, 'div', ['display', 'combinator']);
+      utils.createHtmlElement(elem, 'span', ['signal'], this.signal);
+      this.valueElement = utils.createHtmlElement(
           elem, 'span', ['value'], '' + this.value);
     }
   }
@@ -452,6 +448,7 @@
     step(state, newState) {}
     
     initElement(root) {
+      super.initElement(root);
       root.classList.add('comment');
       root.textContent = this.text;
     }

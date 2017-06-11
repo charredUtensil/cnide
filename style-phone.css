@@ -1,0 +1,16 @@
+.network  {
+  margin-right: 0px;
+  top: 100px;
+}
+.debug {
+  left: 0;
+  bottom: initial;
+  width: 100%;
+  height: 100px;
+}
+.debug th {
+  padding-left: 20px;
+}
+.debug .value {
+  padding-right: 20px;
+}
