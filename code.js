@@ -1,20 +1,25 @@
 (function(){
+  const _createButton = function(parentElement, text, icon, onClick) {
+    const elem = utils.createHtmlElement(parentElement, 'a', ['btn']);
+    utils.createHtmlElement(elem, 'i', ['fa', 'fa-' + icon]);
+    utils.createHtmlElement(elem, 'span', ['text'], text);
+    elem.title = text;
+    elem.onclick = onClick;
+    return elem;
+  }
+
   class Editor {
     constructor(parentElement) {
       this.wrapperElement = utils.createHtmlElement(parentElement, 'div', ['editing'])
       const menu = utils.createHtmlElement(this.wrapperElement, 'div', ['menu']);
-      utils.createHtmlElement(menu, 'a', ['edit', 'btn'], 'Run\u25B6').onclick =
-          () => this.compileAndRun();
-      utils.createHtmlElement(menu, 'a', ['run', 'btn'], 'Edit').onclick =
-          () => this.returnToEditMode();
-      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u2759\u2759').onclick =
-          () => this.emulator.pause();
-      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u2759\u25B6').onclick =
-          () => this.emulator.step();
-      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6').onclick =
-          () => this.emulator.run(500);
-      utils.createHtmlElement(menu, 'a', ['run', 'btn'], '\u25B6\u25B6').onclick =
-          () => this.emulator.run(1000/60);
+      const edit = utils.createHtmlElement(menu, 'div', ['edit']);
+      _createButton(edit, 'Run', 'play', () => this.compileAndRun());
+      const run = utils.createHtmlElement(menu, 'div', ['run']);
+      _createButton(run, 'Edit', 'code', () => this.returnToEditMode());
+      _createButton(run, 'Pause', 'pause', () => this.emulator.pause());
+      _createButton(run, 'Step', 'step-forward', () => this.emulator.step());
+      _createButton(run, 'Slow', 'play', () => this.emulator.run(500));
+      _createButton(run, 'Fast', 'forward', () => this.emulator.run(1000/60));
       const editorElement = utils.createHtmlElement(
           this.wrapperElement, 'div', ['editor']);
       this.textarea = utils.createHtmlElement(editorElement, 'textarea');
@@ -28,16 +33,21 @@
     
     compileAndRun() {
       this.autosave();
+      if (this.emulator) { return; }
       try {
         this.emulator = new Emulator(
             this.textarea.value, this.wrapperElement);
-        this.wrapperElement.classList.remove('editing');
-        this.wrapperElement.classList.add('running');
+        this.textarea.disabled = true;
+        window.setTimeout(() => {
+          this.wrapperElement.classList.remove('editing');
+          this.wrapperElement.classList.add('running');
+        }, 1);
       } catch (e) {
         if (e instanceof parser.SyntaxError) {
-          alert(e.message);
-          this.textarea.select();
+          alert('Syntax Error on line ' + e.location.start.line + ':\n' + e.message);
           this.textarea.setSelectionRange(e.location.start.offset, e.location.end.offset);
+          this.textarea.blur();
+          this.textarea.focus();
         } else {
           throw e;
         }
@@ -45,11 +55,14 @@
     }
     
     returnToEditMode() {
-      this.emulator.pause();
-      this.emulator.remove();
+      const emulator = this.emulator;
+      if (!emulator) { return; }
+      this.emulator = null;
+      emulator.pause();
+      window.setTimeout(() => emulator.remove(), 400);
       this.wrapperElement.classList.remove('running');
       this.wrapperElement.classList.add('editing');
-      this.emulator = null;
+      this.textarea.disabled = false;
     }
   }
   

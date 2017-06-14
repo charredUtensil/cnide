@@ -1,5 +1,6 @@
 (function(){
-  const _htmlClassListForSignal = function(signal) {
+  /** Returns the list of classes for a given value, signal, or special signal. */
+  const htmlClassListForSignal_ = function(signal) {
     if (signal == 'all' || signal == 'any' || signal == 'each') {
       return ['signal', signal];
     } else if (typeof signal == 'string') {
@@ -9,7 +10,12 @@
     }
   }
   
-  const _mergeSignals = function(to, from) {
+  /**
+   * Modifies the "to" object to add every value for every key from the "from" object.
+   * This essentially "merges" two wire values together to form the final result.
+   * Keys with a value of 0 are removed.
+   */
+  const mergeSignals_ = function(to, from) {
     for (const k of Object.keys(from)) {
       to[k] = (to[k] || 0) + from[k];
       if (!to[k]) {
@@ -18,18 +24,26 @@
     }
   }
   
+  /**
+   * The root circuit network which contains all combinators and other networked things.
+   */
   class CircuitNetwork extends utils.Renderable {
     constructor() {
       super();
       this.tick = 0;
+      /**
+       * State is a map of wire names to maps of signal names to values.
+       */
       this.state = {};
       this.children = [];
     }
     
+    /** Adds the child to this network. */
     add(child) {
       this.children.push(child);
     }
     
+    /** Runs the simulation one tick forward. */
     step() {
       this.tick++;
       const newState = {};
@@ -40,6 +54,7 @@
       this.renderDebugPane_();
     }
     
+    /** @Override */
     initElement(root) {
       root.classList.add('network-wrapper');
       const networkElement = utils.createHtmlElement(root, 'div', ['network']);
@@ -71,9 +86,18 @@
     }
   }
   
+  /** Something that can be connected to a circuit network. */
   class Networked extends utils.Renderable {
+    /**
+     * Runs the simulation for this object one tick forward.
+     * Args:
+     *   state: The current (previous) state.
+     *   newState: The state after the current tick completes. This should be modified by
+     *       this function however it will affect the new state.
+     */
     step(state, newState) {}
     
+    /** @Override */
     initElement(root) {
       root.classList.add('networked');
     }
@@ -87,21 +111,32 @@
       this.element = null;
     }
     
+    /** @Override that delegates to getOutput() */
     step(state, newState) {
       const input = {};
       for (const w of this.inputs) {
-      	_mergeSignals(input, state[w] || {});
+      	mergeSignals_(input, state[w] || {});
       }
       const output = this.getOutput(input);
       for (const w of this.outputs) {
         newState[w] = newState[w] || {}
-      	_mergeSignals(newState[w], output);
+      	mergeSignals_(newState[w], output);
       }
     }
     
+    /**
+     * Runs the simulation one tick forward.
+     * Args:
+     *   input: A map of signal names to values for the sum of wires connected to the
+     *       input of this combinator.
+     * Returns:
+     *   A map of signal names to values for the wires connected to the output of this
+     *       combinator.
+     */
     getOutput(input) { return {}; }
     
-    _opToNumber(values, operand) {
+    /** Parses an operand as a number or signal, returning the value. */
+    opToNumber_(values, operand) {
       if (typeof operand == "string") {
         return values[operand] || 0;
       } else {
@@ -118,6 +153,7 @@
       }
     }
     
+    /** @Override */
     initElement(root) {
       super.initElement(root);
       this.appendWireElements_(root, this.inputs, 'input');
@@ -125,24 +161,27 @@
     }
   }
   
+  /** A combinator which always outputs a constant value. */
   class ConstantCombinator extends Combinator {
   	constructor(outputs, values) {
       super([], outputs);
       this.values = values;
     }
     
+    /** @Override */
     getOutput(inputs) {
       return this.values;
     }
     
-    _CombinatorCssClassList() {
+    CombinatorCssClassList_() {
       return ['constant', 'combinator'];
     }
     
+    /** @Override */
     initElement(root) {
       super.initElement(root);
       this.body =
-        utils.createHtmlElement(root, 'div', this._CombinatorCssClassList());
+        utils.createHtmlElement(root, 'div', this.CombinatorCssClassList_());
       const table = utils.createHtmlElement(this.body, 'table', ['values']);
       for (const k of Object.keys(this.values)) {
         const tr = utils.createHtmlElement(table, 'tr');
@@ -152,17 +191,19 @@
     }
   }
   
+  /** A constant combinator that is turned on/off by clicking on it. */
   class ToggleButton extends ConstantCombinator {
   	constructor(outputs, values) {
       super(outputs, values);
       this.active = false;
     }
     
+    /** @Override */
     getOutput(inputs) {
       return this.active ? super.getOutput(inputs) : {};
     }
     
-    _setActive(active) {
+    setActive_(active) {
       if (active) {
         this.body.classList.add('active');
       } else {
@@ -171,29 +212,35 @@
       this.active = active;
     }
     
-    _CombinatorCssClassList() {
+    CombinatorCssClassList_() {
       return ['toggle', 'button', 'constant', 'combinator']
     }
     
+    /** @Override */
     initElement(root) {
       super.initElement(root);
-      this.body.onclick = () => this._setActive(!this.active);
+      this.body.onclick = () => this.setActive_(!this.active);
     }
   }
   
+  /** A toggle button combinator that resets itself on each tick. */
   class PulseButton extends ToggleButton {
     getOutput(inputs) {
       const result = super.getOutput(inputs);
-      this._setActive(false);
+      this.setActive_(false);
       return result;
     }
     
-    _CombinatorCssClassList() {
+    CombinatorCssClassList_() {
       return ['pulse', 'button', 'constant', 'combinator']
     }
   }
   
-  // Combined functions for operators for arithmetic / deciders.
+  /**
+   * Functions for operators for arithmetic and decider combinators. Each function
+   * performs the operation on its two inputs and returns the result. The arithmetic
+   * functions return numbers and the decider functions return booleans.
+   */
   const OPERATOR_FUNCTIONS = {
       '+':  (a, b) => a + b,
       '-':  (a, b) => a - b,
@@ -212,6 +259,11 @@
       '>=': (a, b) => a >= b,
       '>':  (a, b) => a > b};
   
+  /**
+   * A combinator that performs operations on numbers.
+   * This class is abstract. Subclasses define behavior based on which special signals are
+   * present.
+   */
   class ArithmeticCombinator extends Combinator {
     constructor(inputs, outputs, operator, left, right, outputSignal) {
       super(inputs, outputs);
@@ -222,39 +274,42 @@
       this.outputSignal = outputSignal;
     }
     
-    _apply(values, a, b) {
+    apply_(values, a, b) {
       return this.operatorFn(
-          this._opToNumber(values, a),
-          this._opToNumber(values, b));
+          this.opToNumber_(values, a),
+          this.opToNumber_(values, b));
     }
     
+    /** @Override */
     initElement(root) {
       super.initElement(root);
       const elem =
           utils.createHtmlElement(root, 'div', ['arithmetic', 'combinator']);
       utils.createHtmlElement(
-        elem, 'span', _htmlClassListForSignal(this.left), this.left);
+        elem, 'span', htmlClassListForSignal_(this.left), this.left);
       elem.innerHTML += ' ';
       utils.createHtmlElement(elem, 'span', ['operator'], this.operator);
       elem.innerHTML += ' ';
       utils.createHtmlElement(
-        elem, 'span', _htmlClassListForSignal(this.right), this.right);
+        elem, 'span', htmlClassListForSignal_(this.right), this.right);
       elem.innerHTML += ' as ';
       utils.createHtmlElement(
-        elem, 'span', _htmlClassListForSignal(this.outputSignal),
+        elem, 'span', htmlClassListForSignal_(this.outputSignal),
         this.outputSignal);
     }
   }
   
+  /** An arithmetic combinator without special signals. */
   class ValueAsValueArithmeticCombinator extends ArithmeticCombinator {
     getOutput(input) {
       const r = {};
       r[this.outputSignal] =
-      this._apply(input, this.left, this.right);
+      this.apply_(input, this.left, this.right);
       return r;
     }
   }
   
+  /** An arithmetic combinator with "each" as its left input. */
   class EachAsValueArithmeticCombinator extends ArithmeticCombinator {
     constructor(inputs, outputs, operator, right, outputSignal) {
       super(inputs, outputs, operator, 'each', right, outputSignal);
@@ -263,7 +318,7 @@
     getOutput(input) {
       let sum = 0;
       for (const k of Object.keys(input)) {
-        sum += this._apply(input, k, this.right);
+        sum += this.apply_(input, k, this.right);
       }
       const r = {};
       r[this.outputSignal] = sum;
@@ -271,6 +326,7 @@
     }
   }
   
+  /** An arithmetic combinator with "each" as its left input and output. */
   class EachAsEachArithmeticCombinator extends ArithmeticCombinator {
     constructor(inputs, outputs, operator, right) {
       super(inputs, outputs, operator, 'each', right, 'each');
@@ -279,7 +335,7 @@
     getOutput(input) {
       const r = {};
       for (const k of Object.keys(input)) {
-        r[k] = this._apply(input, k, this.right);
+        r[k] = this.apply_(input, k, this.right);
       }
       return r;
     }
@@ -297,10 +353,10 @@
       this.asOne = asOne;
     }
     
-    _compare(values, a, b) {
+    compare_(values, a, b) {
       return this.operatorFn(
-          this._opToNumber(values, a),
-          this._opToNumber(values, b));
+          this.opToNumber_(values, a),
+          this.opToNumber_(values, b));
     }
     
     initElement(root) {
@@ -308,17 +364,17 @@
       const elem =
           utils.createHtmlElement(root, 'div', ['decider', 'combinator']);
       utils.createHtmlElement(
-          elem, 'span', _htmlClassListForSignal(this.left),
+          elem, 'span', htmlClassListForSignal_(this.left),
           this.left);
       elem.innerHTML += ' ';
       utils.createHtmlElement(elem, 'span', ['operator'], this.operator);
       elem.innerHTML += ' ';
       utils.createHtmlElement(
-          elem, 'span', _htmlClassListForSignal(this.right),
+          elem, 'span', htmlClassListForSignal_(this.right),
           this.right);
       elem.innerHTML += ' then ';
       utils.createHtmlElement(
-          elem, 'span', _htmlClassListForSignal(this.outputSignal),
+          elem, 'span', htmlClassListForSignal_(this.outputSignal),
           this.outputSignal);
       elem.innerHTML += ' ';
       utils.createHtmlElement(
@@ -336,12 +392,12 @@
       this.conditionMet = false;
     }
     
-    _checkCondition(values) {
+    checkCondition_(values) {
       if (!this.isAny && !this.isAll) {
-        return this._compare(values, this.left, this.right);
+        return this.compare_(values, this.left, this.right);
       }
       for (const k of Object.keys(input)) {
-        const condition = this._compare(input, k, this.right);
+        const condition = this.compare_(input, k, this.right);
         if (this.isAny && condition) { return true; }
         if (this.isAll && !condition) { return false; }
       }
@@ -349,7 +405,7 @@
     }
     
     getOutput(input) {
-      this.conditionMet = this._checkCondition(input);
+      this.conditionMet = this.checkCondition_(input);
       if (!this.conditionMet) { return {}; }
       if (this.outputSignal == 'all') {
         if (this.asOne) {
@@ -382,7 +438,7 @@
     getOutput(input) {
       let sum = 0;
       for (const k of Object.keys(input)) {
-        const condition = this._compare(input, k, this.right);
+        const condition = this.compare_(input, k, this.right);
         if (!condition) { break; }
         sum += this.asOne ? 1 : input[k];
       }
@@ -402,7 +458,7 @@
     getOutput(input) {
       const r = {};
       for (const k of Object.keys(input)) {
-        const condition = this._compare(input, k, this.right);
+        const condition = this.compare_(input, k, this.right);
         if (!condition) { break; }
         r[k] = this.asOne ? 1 : input[k];
       }
@@ -460,7 +516,6 @@
   network.ConstantCombinator = ConstantCombinator;
   network.PulseButton = PulseButton;
   network.ToggleButton = ToggleButton;
-  network.ArithmeticCombinator = ArithmeticCombinator;
   network.ValueAsValueArithmeticCombinator = ValueAsValueArithmeticCombinator;
   network.EachAsValueArithmeticCombinator = EachAsValueArithmeticCombinator;
   network.EachAsEachArithmeticCombinator = EachAsEachArithmeticCombinator;

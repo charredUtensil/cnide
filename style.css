@@ -24,26 +24,34 @@ body {
 
 /* Menu */
 .menu {
+  position: relative;
   height: 48px;
   line-height: 48px;
   font-size: 24px;
+  overflow: hidden;
+  white-space: pre;
+  transition: background-color 0.3s ease-in-out;
 }
 .menu .btn {
-  padding-left: 20px;
+  margin-top: -3em;
+  padding: 3em 10px;
   cursor: pointer;
 }
-.editing .menu {
-  background: #00bcd4;
-  color: #FFF
+.menu .btn .text {
+  font-size: 10px;
+  padding-left: 5px;
 }
-.running .menu {
-  background: #4c4c4c;
+.menu .edit,
+.menu .run {
+  position: absolute;
+  left: 0;
+  transition: left 0.3s ease-out;
+}
+.menu .edit {
+  color: #FFF;
+}
+.menu .run {
   color: #e69100;
-}
-.editing .run.btn,
-.running .edit.btn,
-.running .editor {
-  display: none;
 }
 
 
@@ -53,9 +61,9 @@ body {
   top: 48px;
   bottom: 0;
   left: 0;
-  right: 0;
   width: 100%;
   overflow-y: scroll;
+  transition: left 0.3s ease-out;
 }
 .editor > textarea {
   position: absolute;
@@ -64,11 +72,15 @@ body {
   left: 0;
   right: 0;
   width: 100%;
+  padding: 2px 10px;
+  box-sizing: border-box;
   background: transparent;
   color: #FFF;
   border: none;
   font-family: 'Overpass Mono', monospace;
   font-size: 14px;
+  line-height: 18px;
+  resize: none;
 }
 
 
@@ -76,9 +88,10 @@ body {
 .network-wrapper {
   position: absolute;
   top: 48px;
-  right: 0;
   bottom: 0;
   left: 0;
+  width: 100%;
+  transition: left 0.3s ease-out;
 }
 
 .network  {
@@ -124,6 +137,26 @@ body {
 }
 
 
+/* UI Transitions */
+.editing .menu {
+  background-color: #00bcd4;
+}
+.running .menu {
+  background-color: #4c4c4c;
+}
+.editing .menu .run,
+.editing .network-wrapper {
+  left: 100%;
+  transition: left 0.3s ease-in;
+}
+.running .menu .edit,
+.running .editor {
+  left: -100%;
+  transition: left 0.3s ease-in;
+}
+
+
+/* Network Elements*/
 .networked {
   margin: 0 80px 2px;
   position: relative;
