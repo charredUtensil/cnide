@@ -1,10 +1,100 @@
-CircuitNetwork
-  = _ nodes:(Networked _)* {
-      const result = new network.CircuitNetwork;
-      for (const x of nodes) {
-        result.add(x[0]);
+{
+  const network = window.network || {};
+  if (!window.network) {
+    class CN { constructor(){this.c=[];} add(e){this.c.push(e);}}
+    network.CircuitNetwork = CN;
+    network.CircuitSubNetwork = CN;
+  }
+  
+  class UnboundCircuitNetwork {
+    constructor(name, params) {
+      this.name = name;
+      this.params = params;
+      this.children = [];
+    }
+    
+    add(child) {
+      this.children.push(child)
+    }
+    
+    bind(networks, wires, signals, main) {
+      const result =
+          main ?
+          new network.CircuitNetwork() : 
+          new network.CircuitSubNetwork(this.name, wires);
+      const childNetworks = {}
+      Object.assign(childNetworks, networks);
+      delete childNetworks[this.name];
+      for (const child of this.children) {
+        result.add(child.bind(childNetworks, {}, signals));
       }
       return result;
+    }
+  }
+  
+  /**
+   * A constructor ready to be bound to its arguments.
+   * The binding isn't done immediately to allow for substitutions.
+   */
+  class Statement {
+    constructor(location, klass, ...args) {
+      this.location = location;
+      this.klass = klass;
+      this.args = args;
+    }
+    
+    bind(networks, wires, signals) {
+      const boundArgs = [];
+      for (const arg of this.args) {
+        if (arg in signals) {
+          boundArgs.push(signals[arg]);
+        } else { 
+          boundArgs.push(arg);
+        }
+      }
+      return this.klass ? new this.klass(...boundArgs) : boundArgs;
+    }
+  }
+  
+  class SubNetworkReferenceStatement {
+    constructor(location, name, wireBindings, signalBindings) {
+      this.location = location;
+      this.name = name;
+      this.wireBindings = wireBindings;
+      this.signalBindings = signalBindings
+    }
+    
+    bind(networks, wires, signals) {
+      if (!(this.name in networks)) {
+        error(this.name + ' network is not defined.', this.location);
+      }
+      // TODO: This won't let you nest signal bindings.
+      const unboundNetwork = networks[this.name];
+      for (const param of Object.keys(this.wireBindings)) {
+        if (!unboundNetwork.params.has(param)) {
+          error(this.name + ' network does not have parameter "' +
+              param + '"', this.location);
+        }
+      }
+      return unboundNetwork.bind(
+        networks, this.wireBindings, this.signalBindings);
+    }
+  }
+}
+
+CnideProgram
+  = _ nodes:(CircuitNetwork _)* !. {
+      const networks = {};
+      for (const x of nodes) {
+        networks[x[0].name] = x[0];
+      }
+      if (!("Main" in networks)) {
+        error(
+            "No Main network was defined. " +
+            "You must define a Main() {} network.",
+            {start: location().end, end: location().end});
+      }
+      return networks["Main"].bind(networks, {}, {}, true /* main */);
     }
 
 _ "whitespace"
@@ -12,23 +102,25 @@ _ "whitespace"
 
 As = "as"
 Then = "then"
-FutureReservedWord
-  = "def" / "public"
+Export = "export"
 
 ReservedWord
   = SpecialSignal
-  / ButtonMode
-  / As / Then
-  / FutureReservedWord
+  / ButtonKind
+  / As / Then / Export
 
+// Network Name
+NetworkName "network name"
+  = [A-Z][A-Za-z0-9]* { return text(); }
+  
 // Named Wires
 Wire "wire"
   = [A-Z][A-Z0-9_]* { return text(); }
 
 WirePair
-  = a:Wire _ b:Wire { return [a, b] }
+  = "(" a:Wire _ "," _ b:Wire ")" { return [a, b] }
   / a:Wire { return [a] }
-  / !Wire { return [] }
+  / "()" { return [] }
 
 // Operands
 Integer "integer"
@@ -56,56 +148,71 @@ ArithmeticOperator "arithmetic operator"
 
 DeciderOperator "decider operator"
  = [<>!] "="? { return text(); }
- / "=" { return text(); }
+ / "="
 
 // Building blocks for Constant Combinators
 KeyValue
-  = key:Signal _ ":" _ value:Integer _ tail:("," _ KeyValue)? {
-      const result = tail ? tail[2] : {};
-      result[key] = (result[key] || 0) + value;
-      return result;
+  = key:Signal _ ":" _ value:Integer {
+      return {key: key, value: value};
     }
+
+KeyValues
+  = kv:KeyValue _ "," _ rest:KeyValues {
+      rest[kv.key] = (rest[kv.key] || 0) + kv.value;
+      if (rest[kv.key] == 0) { delete rest[kv.key]; }
+      return rest;
+    }
+  / kv:KeyValue {
+      const rest = {};
+      rest[kv.key] = kv.value;
+      return rest;
+    }
+  / []* { return {}; }
 
 Pulse "pulse" = "pulse" { return network.PulseButton; }
 Toggle "toggle" = "toggle" { return network.ToggleButton; }
-ButtonMode = Pulse / Toggle
+ButtonKind = Pulse / Toggle
 
 // Combinators
 ConstantCombinator
-  = "->" _ outputs:WirePair _
-    "{" _ values:KeyValue "}"
-    as:(_ As _ ButtonMode)? {
-      const klass = as ? as[3] : network.ConstantCombinator
-      return new klass(outputs, values);
+  = kind:(ButtonKind _ As _)?
+    "{" _ values:KeyValues _ "}" _
+    "->" _ outputs:WirePair
+    {
+      const klass = kind ? kind[0] : network.ConstantCombinator
+      return new Statement(location(), klass, outputs, values);
     }
 
 ValueAsValueArithmeticCombinator
-  = inputs:WirePair _ "->" _ outputs:WirePair _
+  = inputs:WirePair _ "->" _
     left:Operand _
     operator:ArithmeticOperator _
-    right:Operand _ As _ outputSignal:Signal
+    right:Operand _ As _ outputSignal:Signal _
+    "->" _ outputs:WirePair
     {
-      return new network.ValueAsValueArithmeticCombinator(
+      return new Statement(location(), network.ValueAsValueArithmeticCombinator, 
         inputs, outputs, operator, left, right, outputSignal);
     }
 
 EachAsValueArithmeticCombinator
-  = inputs:WirePair _ "->" _ outputs:WirePair _
-    left:Each _
+  = inputs:WirePair _ "->" _
+    Each _
     operator:ArithmeticOperator _
-    right:Operand _ As _ outputSignal:Signal
+    right:Operand _ As _ outputSignal:Signal _
+    "->" _ outputs:WirePair
     {
-      return new network.EachAsValueArithmeticCombinator(
+      return new Statement(location(), network.EachAsValueArithmeticCombinator, 
         inputs, outputs, operator, right, outputSignal);
     }
 
 EachAsEachArithmeticCombinator
-  = inputs:WirePair _ "->" _ outputs:WirePair _
-    left:Each _
+  = inputs:WirePair _ "->" _
+    Each _
     operator:ArithmeticOperator _
-    right:Operand _ As _ outputSignal:Each
+    right:Operand _ As _ Each _
+    "->" _ outputs:WirePair
     {
-      return new network.EachAsEachArithmeticCombinator(
+      return new Statement(location(), network.EachAsEachArithmeticCombinator, 
         inputs, outputs, operator, right);
     }
 
@@ -115,36 +222,42 @@ ArithmeticCombinator
   / EachAsEachArithmeticCombinator
 
 SimpleDeciderCombinator
-  = inputs:WirePair _ "->" _ outputs:WirePair _
+  = inputs:WirePair _ "->" _
     left:(Operand / Any / All) _
     operator:DeciderOperator _
-    right:Operand _ Then _ outputSignal:(Signal / All)
-    asOne:(_ As _ "1")?
+    right:Operand _ Then _
+    asOne:("1" _ As _)? _
+    outputSignal:(Signal / All) _
+    "->" _ outputs:WirePair
     {
-      return new network.SimpleDeciderCombinator(
+      return new Statement(location(), network.SimpleDeciderCombinator, 
         inputs, outputs, operator, left, right, outputSignal,
         !!asOne);
     }
 
 SumDeciderCombinator
-  = inputs:WirePair _ "->" _ outputs:WirePair _
-    left:Each _
+  = inputs:WirePair _ "->" _
+    Each _
     operator:DeciderOperator _
-    right:Operand _ Then _ outputSignal:Signal
-    asOne:(_ As _ "1")?
+    right:Operand _ Then _
+    asOne:("1" _ As _)? _
+    outputSignal:Signal _
+    "->" _ outputs:WirePair
     {
-      return new network.SumDeciderCombinator(
+      return new Statement(location(), network.SumDeciderCombinator, 
         inputs, outputs, operator, right, outputSignal, !!asOne);
     }
 
 FilterDeciderCombinator
-  = inputs:WirePair _ "->" _ outputs:WirePair _
-    left:Each _
+  = inputs:WirePair _ "->" _
+    Each _
     operator:DeciderOperator _
-    right:Operand _ Then _ outputSignal:Each
-    asOne:(_ As _ "1")?
+    right:Operand _ Then _
+    asOne:("1" _ As _)? _
+    Each _
+    "->" _ outputs:WirePair
     {
-      return new network.FilterDeciderCombinator(
+      return new Statement(location(), network.FilterDeciderCombinator, 
         inputs, outputs, operator, right, !!asOne);
     }
 
@@ -156,25 +269,94 @@ DeciderCombinator
 Display
   = inputs:WirePair _ "->" _
     "[" _ signal:Signal _ "]" {
-      return new network.Display(inputs, signal);
+      return new Statement(location(), network.Display, inputs, signal);
     }
 
-SingleLineComment
-  = "//" [ \t]* comment:$[^\n]* { return new network.Comment(comment); }
-  
-Comment
-  = head:SingleLineComment tail:(_ Comment)?
-    {
-      if (tail) {
-        return head.join(tail[1]);
-      } else {
-        return head;
-      }
+ExportStatement
+  = Export _ exported:(Wire / Signal) {
+      return new ExportStatement(location(), exported);
     }
+
+SingleBinding
+  = key:Wire _ "=" _ value:Wire {
+    return {kind: 'wires', key: key, value: value}; }
+  / key:Signal _ "=" _ value:Signal {
+    return {kind: 'signals', key: key, value: value}; }
+
+Bindings
+  = kv:SingleBinding _ "," _ rest:Bindings {
+      if (kv.kind == 'signals' && kv.key in rest['signals']) {
+        error('The "' + kv.key +
+            '" parameter is bound more than once');
+      }
+      for (const key of Object.keys(rest['wires'])) {
+        if (key == kv.key) {
+          error('The "' + key +
+              '" parameter is bound more than once');
+        }
+        if (rest['wires'][key] == kv.value) {
+          error('The "' + kv.value +
+              '" wire is bound to more than one parameter');
+        }
+      }
+      rest[kv.kind][kv.key] = kv.value;
+      return rest;
+    }
+  / kv:SingleBinding {
+      const rest = {wires: {}, signals: {}};
+      rest[kv.kind][kv.key] = kv.value;
+      return rest;
+    }
+  / []* { return {wires: {}, signals: {}}; }
+    
+SubNetworkReference
+  = name:NetworkName _ "(" _ bindings:Bindings _ ")" {
+    return new SubNetworkReferenceStatement(
+        location(), name, bindings.wires, bindings.signals);
+  }
   
-Networked
+SingleLineComment
+  = "//" [ \t]* comment:$[^\n]* { return comment; }
+
+Comment
+  = first:SingleLineComment rest:([\n] _ SingleLineComment)* {
+      if (!rest[0]) {
+        return new Statement(location(), network.Comment, first);
+      }
+      let otherLines = [];
+      for (const line of rest) {
+        otherLines.push(line[2]);
+      }
+      return new Statement(location(),
+          network.Comment, first + '\n' + otherLines.join(' '));
+    }
+    
+Statement
   = ConstantCombinator
   / ArithmeticCombinator
   / DeciderCombinator
   / Display
+  / SubNetworkReference
   / Comment
+
+NetworkParameters
+  = first:(Wire / Signal) _ "," _ rest:NetworkParameters {
+      if (rest.has(first)) {
+        error('Duplicate parameter "' + first + '"');
+      }
+      rest.add(first);
+      return rest;
+    }
+  / first:(Wire / Signal) { return new Set([first]); }
+  / []* { return new Set(); }
+
+CircuitNetwork
+  = name:NetworkName _
+    "(" _ params:NetworkParameters _ ")" _
+    "{" _ nodes:(Statement _)* _ "}" {
+      const result = new UnboundCircuitNetwork(name, params);
+      for (const x of nodes) {
+        result.add(x[0]);
+      }
+      return result;
+    }

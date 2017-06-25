@@ -1,0 +1,33 @@
+Main {
+  // Train Dispatcher
+  // Sending a signal over the network indicates that a train should be dispatched.
+  // The station keeps count of how many trains are remaining to dispatch.
+  // The LOAD_COUNTER is connected to the train station and trains are allowed to leave if loads_ready > 0.
+  LOAD_COUNTER -> [loads_ready]
+
+  // Send Network Message
+  // Message indicates dispatch from central cpu
+  // Product count differentiates factory # if multiple exist
+  // Loads ready is the payload
+  pulse as {message: 1, loads_ready: 1, product: 1} -> NETWORK
+  // Presence of train in station
+  // (on = present)
+  toggle as {red: 1} -> TRAIN_SIGNAL
+
+  // Receive load requests
+  NETWORK -> message=1 then 1 as x    -> LC_IN
+  NETWORK -> product=1 then 1 as x    -> LC_IN
+  NETWORK -> each+0           as each -> LC_IN
+  LC_IN   -> x=2  then loads_ready -> LOAD_COUNTER
+  LC_IN -> x=2 then 1 as ack -> NETWORK
+  LOAD_COUNTER -> loads_ready+0 as loads_ready -> LOAD_COUNTER
+
+  // Dispatch trains
+  TRAIN_SIGNAL ->  red>0 then 1 as x -> TD_IN
+  LOAD_COUNTER ->  loads_ready>0 then 1 as x -> TD_IN
+  TD_IN -> x=2 then 1 as green -> DISPATCH
+  TRAIN_SIGNAL -> red=0 then 1 as x -> TD_DEC
+  TD_IN ->  x=2 then 1 as x -> TD_DEC
+  {loads_ready: -1} -> TD_DEC 
+  TD_DEC ->  x=2 then loads_ready -> LOAD_COUNTER
+}

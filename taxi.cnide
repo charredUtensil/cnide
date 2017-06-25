@@ -1,0 +1,78 @@
+Taxi(INTERNET, trigger_signal) {
+  // Presence of train in station
+  toggle as {train_presence: 42}
+    -> TRAIN_STOP
+  // Whether the station is enabled
+  TRAIN_STOP ->
+    [yellow]
+  // Whether the train is dispatched
+  TRAIN_STOP ->
+    [green]
+  
+  // Gates
+  // When both close at the same time,
+  // it means the player has entered the train
+  toggle as {player_presence: 1}
+    -> GATEWIRE
+  toggle as {player_presence: 1}
+    -> GATEWIRE
+    
+  // Destination picker
+  toggle as {iron: 1} -> DESTINATION
+  toggle as {copper: 1} -> DESTINATION
+  toggle as {coal: 1} -> DESTINATION
+  
+  GATEWIRE ->
+    player_presence = 0 then 1 as green
+    -> TRAIN_STOP
+  GATEWIRE ->
+    player_presence > 0 then 1 as yellow
+    -> TRAIN_STOP
+  
+  // Persist enabled-ness while train is not in station
+  TRAIN_STOP ->
+    train_presence = 0 then yellow
+    -> TRAIN_STOP
+  
+  // Read call for taxi
+  INTERNET ->
+    taxi = 1 then 1 as taxi
+    -> REPLY_SEND_DESTINATION
+  TRAIN_STOP ->
+    train_presence > 0 then 1 as taxi
+    -> REPLY_SEND_DESTINATION
+  (REPLY_SEND_DESTINATION, DESTINATION) ->
+    taxi = 2 then all
+    -> INTERNET
+  
+  // Read call to enable
+  INTERNET ->
+    taxi = 2 then 1 as x
+    -> SHOULD_ENABLE
+  INTERNET ->
+    trigger_signal = 1 then 1 as x
+    -> SHOULD_ENABLE
+  SHOULD_ENABLE ->
+    x = 2 then 1 as yellow
+    -> TRAIN_STOP
+}
+
+Main() {
+  // System Clock signal to check for train dispatch
+  pulse as {taxi: 1} -> INTERNET
+  
+  // Iron Depot
+  Taxi(
+    INTERNET = INTERNET,
+    trigger_signal = iron)
+  
+  // Copper Depot
+  Taxi(
+    INTERNET = INTERNET,
+    trigger_signal = copper)
+  
+  // Coal Depot
+  Taxi(
+    INTERNET = INTERNET,
+    trigger_signal = coal)
+}

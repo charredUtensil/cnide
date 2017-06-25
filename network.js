@@ -25,6 +25,27 @@
   }
   
   /**
+   * Creates an HTML table representing a state.
+   */
+  const createStateTable_ = function(root, state) {
+    const table = utils.createHtmlElement(root, 'table');
+    for (const wire of Object.keys(state).sort()) {
+      if (Object.keys(state[wire]).length == 0) {
+        continue;
+      }
+      const wireTr = utils.createHtmlElement(table, 'tr', []);
+      utils.createHtmlElement(wireTr, 'th', [], wire);
+      const wireTable = utils.createHtmlElement(
+          utils.createHtmlElement(wireTr, 'td', []), 'table', []);
+      for (const k of Object.keys(state[wire]).sort()) {
+        const tr = utils.createHtmlElement(wireTable, 'tr', []);
+        utils.createHtmlElement(tr, 'td', ['signal'], k);
+        utils.createHtmlElement(tr, 'td', ['value'], state[wire][k]);
+      }
+    }
+  }
+  
+  /**
    * The root circuit network which contains all combinators and other networked things.
    */
   class CircuitNetwork extends utils.Renderable {
@@ -68,21 +89,7 @@
     renderDebugPane_() {
       this.debugPane.innerHTML = '';
       utils.createHtmlElement(this.debugPane, 'div', ['tick'], 'Tick #' + this.tick);
-      const table = utils.createHtmlElement(this.debugPane, 'table');
-      for (const wire of Object.keys(this.state).sort()) {
-        if (Object.keys(this.state[wire]).length == 0) {
-          continue;
-        }
-        const wireTr = utils.createHtmlElement(table, 'tr', []);
-        utils.createHtmlElement(wireTr, 'th', [], wire);
-        const wireTable = utils.createHtmlElement(
-            utils.createHtmlElement(wireTr, 'td', []), 'table', []);
-        for (const k of Object.keys(this.state[wire]).sort()) {
-          const tr = utils.createHtmlElement(wireTable, 'tr', []);
-          utils.createHtmlElement(tr, 'td', ['signal'], k);
-          utils.createHtmlElement(tr, 'td', ['value'], this.state[wire][k]);
-        }
-      }
+      createStateTable_(this.debugPane, this.state);
     }
   }
   
@@ -373,12 +380,13 @@
           elem, 'span', htmlClassListForSignal_(this.right),
           this.right);
       elem.innerHTML += ' then ';
+      if (this.asOne) {
+        utils.createHtmlElement(
+            elem, 'span', ['as'], '1 as ');
+      }
       utils.createHtmlElement(
           elem, 'span', htmlClassListForSignal_(this.outputSignal),
           this.outputSignal);
-      elem.innerHTML += ' ';
-      utils.createHtmlElement(
-          elem, 'span', ['as'], this.asOne ? 'as 1' : 'as input');
     }
   }
   
@@ -420,7 +428,7 @@
       } else {
         const r = {};
         r[this.outputSignal] =
-            this.asOne ? 1 : input[this.outputSignal];
+            this.asOne ? 1 : input[this.outputSignal] || 0;
         return r;
       }
     }
@@ -491,14 +499,91 @@
     }
   }
   
+  /**
+   * A subnetwork within the root network that has its own set of wires.
+   */
+  class CircuitSubNetwork extends utils.Renderable {
+    constructor(name, wireBindings) {
+      super();
+      this.name = name;
+      this.wireBindings = wireBindings;
+      this.reverseWireBindings = {};
+      for (const key of Object.keys(wireBindings)) {
+        this.reverseWireBindings[wireBindings[key]] = key;
+      }
+      this.internalState = {};
+      this.children = [];
+    }
+    
+    /** Adds the child to this network. */
+    add(child) {
+      this.children.push(child);
+    }
+    
+    /** Runs the simulation one tick forward. */
+    step(state, newState) {
+      const internalState = this.internalState;
+      const newInternalState = {};
+      for (const param of Object.keys(this.wireBindings)) {
+        const value = this.wireBindings[param];
+        internalState[param] = state[value];
+      }
+      for (const c of this.children) {
+        c.step(internalState, newInternalState);
+      }
+      this.internalState = newInternalState;
+      for (const value of Object.keys(this.reverseWireBindings)) {
+        const param = this.reverseWireBindings[value];
+        newState[value] = newState[value] || {};
+        mergeSignals_(newState[value], newInternalState[param] || {});
+        delete newInternalState[param];
+      }
+      this.renderDebugPane_();
+    }
+    
+    /** @Override */
+    initElement(root) {
+      root.classList.add('networked');
+      root.classList.add('subnetwork');
+      const wires = [];
+      for (const param of Object.keys(this.wireBindings)) {
+        wires.push(param + '=' + this.wireBindings[param]);
+      }
+      const header = utils.createHtmlElement(root, 'div', ['header'])
+      utils.createHtmlElement(header, 'i', ['btn', 'collapse', 'fa', 'fa-minus']);
+      utils.createHtmlElement(header, 'i', ['btn', 'uncollapse', 'fa', 'fa-plus']);
+      utils.createHtmlElement(
+          header, 'div', [], this.name + '(' + wires.join(', ') + ')');
+      header.onclick = () => this.toggleCollapsed_();
+      this.debugPane = utils.createHtmlElement(root, 'div', ['debug']);
+      const childrenHolder = utils.createHtmlElement(root, 'div', ['children'])
+      utils.createHtmlElement(childrenHolder, 'div', ['bg'])
+      for (const c of this.children) {
+        c.getDomElement(childrenHolder);
+      }
+      this.collapsed = false;
+      this.renderDebugPane_();
+    }
+    
+    toggleCollapsed_() {
+      if (this.collapsed) {
+        this.getDomElement().classList.remove('collapsed');
+      } else {
+        this.getDomElement().classList.add('collapsed');
+      }
+      this.collapsed = !this.collapsed;
+    }
+    
+    renderDebugPane_() {
+      this.debugPane.innerHTML = '';
+      createStateTable_(this.debugPane, this.internalState);
+    }
+  }
+  
   class Comment extends Networked {
     constructor(text) {
       super();
       this.text = text;
-    }
-    
-    join(other) {
-      return new Comment(this.text + '\n' + other.text);
     }
     
     step(state, newState) {}
@@ -523,6 +608,7 @@
   network.SumDeciderCombinator = SumDeciderCombinator;
   network.FilterDeciderCombinator = FilterDeciderCombinator;
   network.Display = Display;
+  network.CircuitSubNetwork = CircuitSubNetwork;
   network.Comment = Comment;
   window.network = network;
 })();

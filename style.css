@@ -93,6 +93,14 @@ body {
   width: 100%;
   transition: left 0.3s ease-out;
 }
+.network-wrapper > .debug {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 220px;
+  background: #666;
+}
 
 .network  {
   margin-right: 220px;
@@ -106,14 +114,8 @@ body {
   overflow-y: scroll;
 }
 .debug {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
   overflow-x: hidden;
   overflow-y: scroll;
-  width: 220px;
-  background: #666;
 }
 .debug .tick {
   padding: 10px;
@@ -263,6 +265,66 @@ body {
 }
 .combinator.display .value {
   font-size: 24px;
+}
+
+
+.networked.subnetwork {
+  margin: 0 0 10px;
+  padding: 0 0 10px;
+  background: #333;
+  color: #ddd;
+  border-radius: 20px;
+  transition: padding 0.3s ease-in-out;
+}
+.networked.subnetwork.collapsed {
+  padding-bottom: 32px;
+}
+.networked.subnetwork > .header {
+  padding: 10px;
+}
+.networked.subnetwork > .header > .btn {
+  position: absolute;
+  right: 10px;
+  transition: opacity 0.3s ease-in;
+}
+.networked.subnetwork:not(.collapsed) > .header > .btn.uncollapse {
+  opacity: 0;
+}
+.networked.subnetwork > .debug {
+  height: 100px;
+  background: #333;
+  transition: opacity 0.3s ease-out;
+}
+.networked.subnetwork.collapsed > .debug {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+.networked.subnetwork > .children {
+  position: relative;
+  padding: 20px 0;
+  transition:
+      opacity 0.3s ease-out,
+      margin 0.3s ease-in-out,
+      padding 0.3s ease-in-out;
+}
+.networked.subnetwork.collapsed > .children {
+  padding: 0;
+  margin-bottom: -200%;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+      opacity 0.3s ease-in,
+      margin 0.3s ease-in-out,
+      padding 0.3s ease-in-out;
+}
+.networked.subnetwork > .children > .bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #212121;
+  border-radius: 20px;
 }
 
 

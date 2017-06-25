@@ -2,7 +2,7 @@
   margin-right: 0px;
   top: 100px;
 }
-.debug {
+.network-wrapper > .debug {
   left: 0;
   bottom: initial;
   width: 100%;
