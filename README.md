@@ -9,14 +9,17 @@ The first character must be a letter.
 - `INVENTORY`
 - `FOO_BAR`
 - `X`
+
 Wires are separated from combinators with an arrow (`->`).
 Inputs come before the combinator. Outputs come before the combinator.
 - `INPUT -> counter + 1 as counter -> OUTPUT`
+
 You may specify a pair of wires (one red, one green) instead.
 This has the same effect as in Factorio: The inputs are summed together, and the outputs each get the result.
 Cnide makes no distinction between red and green wire, so they may be specified in any order.
 - `(RED, GREEN)`
 - `(GREEN, RED)`
+
 You can also specify that no wires are connected with `()`.
 
 ### Signals
