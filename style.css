@@ -26,31 +26,57 @@ body {
 .menu {
   position: relative;
   height: 48px;
-  line-height: 48px;
-  font-size: 24px;
   overflow: hidden;
   white-space: pre;
   transition: background-color 0.3s ease-in-out;
 }
 .menu .btn {
-  margin-top: -3em;
-  padding: 3em 10px;
+  display: inline-block;
+  position: relative;
+  width: 24px;
+  height: 48px;
+  padding: 0 10px;
   cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+}
+.menu .btn.right {
+  float: right;
+}
+.menu .btn .icon {
+  font-size: 24px;
+  line-height: 100%;
+  top: 5px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  position: absolute;
 }
 .menu .btn .text {
   font-size: 10px;
-  padding-left: 5px;
+  line-height: 100%;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  position: absolute;
+}
+.menu .btn:hover {
+  background: rgba(255, 255, 255, 0.16);
 }
 .menu .edit,
 .menu .run {
   position: absolute;
   left: 0;
-  transition: left 0.3s ease-out;
+  width: 100%;
+  transition:
+      left 0.3s ease-out,
+      opacity 0.3s ease-out;
 }
-.menu .edit {
+.menu .edit .btn {
   color: #FFF;
 }
-.menu .run {
+.menu .run .btn {
   color: #e69100;
 }
 
@@ -84,6 +110,31 @@ body {
 }
 
 
+/* UI Transitions */
+.editing .menu {
+  background-color: #00bcd4;
+}
+.running .menu {
+  background-color: #333;
+}
+.editing .menu .run,
+.editing .network-wrapper {
+  left: 100%;
+  opacity: 0;
+  transition:
+      left 0.3s ease-in,
+      opacity 0.3s ease-in;
+}
+.running .menu .edit,
+.running .editor {
+  left: -100%;
+  opacity: 0;
+  transition:
+      left 0.3s ease-in,
+      opacity 0.3s ease-in;
+}
+
+
 /* Network */
 .network-wrapper {
   position: absolute;
@@ -93,13 +144,22 @@ body {
   width: 100%;
   transition: left 0.3s ease-out;
 }
-.network-wrapper > .debug {
+.network-wrapper > .debug-wrapper {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   width: 220px;
-  background: #666;
+  background: #444;
+}
+.network-wrapper > .debug-wrapper::before {
+  background: linear-gradient(to bottom, #444 0%,rgba(0, 0, 0, 0) 100%);
+}
+.network-wrapper > .debug-wrapper::after {
+  background: linear-gradient(to top, #444 0%,rgba(0, 0, 0, 0) 100%);
+}
+.network-wrapper > .debug-wrapper > .debug > table > tr:nth-child(odd) {
+  background: #333;
 }
 
 .network  {
@@ -113,21 +173,40 @@ body {
   overflow-x: hidden;
   overflow-y: scroll;
 }
+.debug-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+.debug-wrapper::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 10px;
+  background: linear-gradient(to bottom, #333 0%,rgba(0, 0, 0, 0) 100%);
+}
+.debug-wrapper::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 10px;
+  bottom: 0;
+  background: linear-gradient(to top, #333 0%,rgba(0, 0, 0, 0) 100%);
+}
 .debug {
   overflow-x: hidden;
   overflow-y: scroll;
+  height: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
 }
 .debug .tick {
-  padding: 10px;
+  padding: 0px 10px 10px 10px;
 }
 .debug table {
   width: 100%;
   border-spacing: 0;
   font-size: 10px;
   line-height: normal;
-}
-.debug > table > tr:nth-child(odd) {
-  background: #5c5c5c;
 }
 .debug th {
   text-align: left;
@@ -137,26 +216,6 @@ body {
   text-align: right;
   padding-right: 5px;
 }
-
-
-/* UI Transitions */
-.editing .menu {
-  background-color: #00bcd4;
-}
-.running .menu {
-  background-color: #4c4c4c;
-}
-.editing .menu .run,
-.editing .network-wrapper {
-  left: 100%;
-  transition: left 0.3s ease-in;
-}
-.running .menu .edit,
-.running .editor {
-  left: -100%;
-  transition: left 0.3s ease-in;
-}
-
 
 /* Network Elements*/
 .networked {
@@ -215,11 +274,26 @@ body {
   text-align: right;
 }
 .combinator.constant.button {
-  background: #444;
+  background: #333;
   padding: 4px 8px;
-  border: 2px dotted #999;
+  border: 2px dotted #e69100;
   min-height: 2em;
-  box-shadow: inset black 0 0 2em;
+  cursor: pointer;
+  user-select: none;
+}
+.combinator.constant.button .values {
+  padding-left: 40px;
+}
+.combinator.constant.button .icon {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  font-size: 30px;
+  line-height: 100%;
+  color: #e69100;
+}
+.combinator.constant.button:not(.active):hover {
+  background: #444;
 }
 .combinator.constant.button:not(.active) .signal {
   color: #526d82;
@@ -227,21 +301,13 @@ body {
 .combinator.constant.button:not(.active) .value {
   color: #7b7b7b;
 }
-.combinator.constant.button.toggle {
-  border-color: #19b;
+.combinator.constant.button.active {
+  background: #610704;
+  border: 2px solid #e69100;
 }
-.combinator.constant.button.toggle.active {
-  background: #19b;
-  box-shadow: #0bd 0 0 2em;
-  border: 2px solid #0bd;
-}
-.combinator.constant.button.pulse {
-  border-color: #fd2;
-}
-.combinator.constant.button.pulse.active {
-  background: #fd2;
-  box-shadow: #fe4 0 0 2em;
-  border: 2px solid #fe4;
+.combinator.constant.button.active .icon.inactive,
+.combinator.constant.button:not(.active) .icon.active {
+  display: none;
 }
 
 
@@ -274,13 +340,10 @@ body {
   background: #333;
   color: #ddd;
   border-radius: 20px;
-  transition: padding 0.3s ease-in-out;
-}
-.networked.subnetwork.collapsed {
-  padding-bottom: 32px;
 }
 .networked.subnetwork > .header {
   padding: 10px;
+  margin-bottom: -10px;
 }
 .networked.subnetwork > .header > .btn {
   position: absolute;
@@ -290,31 +353,39 @@ body {
 .networked.subnetwork:not(.collapsed) > .header > .btn.uncollapse {
   opacity: 0;
 }
-.networked.subnetwork > .debug {
-  height: 100px;
+.networked.subnetwork > .debug-wrapper {
+  height: 120px;
   background: #333;
-  transition: opacity 0.3s ease-out;
+  transition:
+      height 0.3s ease-in-out,
+      opacity 0.3s ease-out;
 }
-.networked.subnetwork.collapsed > .debug {
+.networked.subnetwork > .debug-wrapper > .debug > table > tr:nth-child(odd) {
+  background: #444;
+}
+.networked.subnetwork.collapsed > .debug-wrapper {
+  height: 0;
   opacity: 0;
-  transition: opacity 0.3s ease-in;
+  transition:
+      height 0.3s ease-in-out,
+      opacity 0.3s ease-in;
 }
 .networked.subnetwork > .children {
   position: relative;
   padding: 20px 0;
+  overflow: hidden;
   transition:
       opacity 0.3s ease-out,
-      margin 0.3s ease-in-out,
+      max-height 0.3s ease-in-out,
       padding 0.3s ease-in-out;
 }
 .networked.subnetwork.collapsed > .children {
-  padding: 0;
-  margin-bottom: -200%;
   opacity: 0;
-  overflow: hidden;
+  max-height: 0;
+  padding: 0;
   transition:
       opacity 0.3s ease-in,
-      margin 0.3s ease-in-out,
+      max-height 0.3s ease-in-out,
       padding 0.3s ease-in-out;
 }
 .networked.subnetwork > .children > .bg {

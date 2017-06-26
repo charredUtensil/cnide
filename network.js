@@ -82,7 +82,8 @@
       for (const c of this.children) {
         c.getDomElement(networkElement);
       }
-      this.debugPane = utils.createHtmlElement(root, 'div', ['debug']);
+      this.debugPane = utils.createHtmlElement(
+          utils.createHtmlElement(root, 'div', ['debug-wrapper']), 'div', ['debug']);
       this.renderDebugPane_();
     }
     
@@ -180,7 +181,7 @@
       return this.values;
     }
     
-    CombinatorCssClassList_() {
+    combinatorCssClassList_() {
       return ['constant', 'combinator'];
     }
     
@@ -188,7 +189,7 @@
     initElement(root) {
       super.initElement(root);
       this.body =
-        utils.createHtmlElement(root, 'div', this.CombinatorCssClassList_());
+        utils.createHtmlElement(root, 'div', this.combinatorCssClassList_());
       const table = utils.createHtmlElement(this.body, 'table', ['values']);
       for (const k of Object.keys(this.values)) {
         const tr = utils.createHtmlElement(table, 'tr');
@@ -219,14 +220,23 @@
       this.active = active;
     }
     
-    CombinatorCssClassList_() {
+    combinatorCssClassList_() {
       return ['toggle', 'button', 'constant', 'combinator']
+    }
+    
+    faIcons_() {
+      return {active: 'power-off', inactive: 'circle-o'};
     }
     
     /** @Override */
     initElement(root) {
       super.initElement(root);
       this.body.onclick = () => this.setActive_(!this.active);
+      const fa = this.faIcons_()
+      utils.createHtmlElement(
+          this.body, 'i', ['icon', 'inactive', 'fa', 'fa-' + fa.inactive]);
+      utils.createHtmlElement(
+          this.body, 'i', ['icon', 'active', 'fa', 'fa-' + fa.active]);
     }
   }
   
@@ -238,7 +248,7 @@
       return result;
     }
     
-    CombinatorCssClassList_() {
+    combinatorCssClassList_() {
       return ['pulse', 'button', 'constant', 'combinator']
     }
   }
@@ -554,8 +564,8 @@
       utils.createHtmlElement(header, 'i', ['btn', 'uncollapse', 'fa', 'fa-plus']);
       utils.createHtmlElement(
           header, 'div', [], this.name + '(' + wires.join(', ') + ')');
-      header.onclick = () => this.toggleCollapsed_();
-      this.debugPane = utils.createHtmlElement(root, 'div', ['debug']);
+      const debugWrapper = utils.createHtmlElement(root, 'div', ['debug-wrapper']);
+      this.debugPane = utils.createHtmlElement(debugWrapper, 'div', ['debug']);
       const childrenHolder = utils.createHtmlElement(root, 'div', ['children'])
       utils.createHtmlElement(childrenHolder, 'div', ['bg'])
       for (const c of this.children) {
@@ -563,6 +573,8 @@
       }
       this.collapsed = false;
       this.renderDebugPane_();
+      header.onclick = () => this.toggleCollapsed_();
+      debugWrapper.onclick = () => this.toggleCollapsed_();
     }
     
     toggleCollapsed_() {

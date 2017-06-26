@@ -1,8 +1,10 @@
 (function(){
-  const _createButton = function(parentElement, text, icon, onClick) {
+  const HELLO_WORLD_ = 'Main() {\n  \n}'
+  
+  const createButton_ = function(parentElement, text, icon, onClick) {
     const elem = utils.createHtmlElement(parentElement, 'a', ['btn']);
-    utils.createHtmlElement(elem, 'i', ['fa', 'fa-' + icon]);
-    utils.createHtmlElement(elem, 'span', ['text'], text);
+    utils.createHtmlElement(elem, 'i', ['icon', 'fa', 'fa-' + icon]);
+    utils.createHtmlElement(elem, 'div', ['text'], text);
     elem.title = text;
     elem.onclick = onClick;
     return elem;
@@ -12,18 +14,25 @@
     constructor(parentElement) {
       this.wrapperElement = utils.createHtmlElement(parentElement, 'div', ['editing'])
       const menu = utils.createHtmlElement(this.wrapperElement, 'div', ['menu']);
+      
       const edit = utils.createHtmlElement(menu, 'div', ['edit']);
-      _createButton(edit, 'Run', 'play', () => this.compileAndRun());
+      createButton_(edit, 'Run', 'play', () => this.compileAndRun());
+      const gitHub = createButton_(edit, 'GitHub', 'github', () => this.autosave())
+      gitHub.href='https://github.com/charredutensil/cnide';
+      gitHub.target='blank';
+      gitHub.classList.add('right');
+      
       const run = utils.createHtmlElement(menu, 'div', ['run']);
-      _createButton(run, 'Edit', 'code', () => this.returnToEditMode());
-      _createButton(run, 'Pause', 'pause', () => this.emulator.pause());
-      _createButton(run, 'Step', 'step-forward', () => this.emulator.step());
-      _createButton(run, 'Slow', 'play', () => this.emulator.run(500));
-      _createButton(run, 'Fast', 'forward', () => this.emulator.run(1000/60));
+      createButton_(run, 'Edit', 'code', () => this.returnToEditMode());
+      createButton_(run, 'Pause', 'pause', () => this.emulator.pause());
+      createButton_(run, 'Step', 'step-forward', () => this.emulator.step());
+      createButton_(run, 'Slow', 'play', () => this.emulator.run(500));
+      createButton_(run, 'Fast', 'forward', () => this.emulator.run(1000/60));
+      
       const editorElement = utils.createHtmlElement(
           this.wrapperElement, 'div', ['editor']);
       this.textarea = utils.createHtmlElement(editorElement, 'textarea');
-      this.textarea.value = localStorage.getItem('autosave') || '';
+      this.textarea.value = localStorage.getItem('autosave') || HELLO_WORLD_;
       this.emulator = null;
     }
     
@@ -74,7 +83,7 @@
         this.network.getDomElement(parentElement));
     };
   
-    _step() {
+    step_() {
       this.network.step();
     };
   
@@ -87,12 +96,12 @@
   
     step() {
       this.pause();
-      this._step();
+      this.step_();
     };
   
     run(millisPerTick) {
       this.pause();
-      this.interval = window.setInterval(() => this._step(), millisPerTick);
+      this.interval = window.setInterval(() => this.step_(), millisPerTick);
     };
     
     remove() {
