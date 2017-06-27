@@ -12,7 +12,8 @@
 
   class Editor {
     constructor(parentElement) {
-      this.wrapperElement = utils.createHtmlElement(parentElement, 'div', ['editing'])
+      this.wrapperElement =
+        utils.createHtmlElement(parentElement, 'div', ['editor-wrapper', 'editing'])
       const menu = utils.createHtmlElement(this.wrapperElement, 'div', ['menu']);
       
       const edit = utils.createHtmlElement(menu, 'div', ['edit']);

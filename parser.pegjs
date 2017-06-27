@@ -130,8 +130,8 @@ Signal "signal"
   = !ReservedWord [a-z][a-z0-9_]* { return text(); }
 
 Each "each" = "each" { return "each"; }
-Any "any" = "any" / "anything" { return "any"; }
-All "all" = "all" / "everything" { return "all"; }
+Any "any" = "anything" / "any" { return "any"; }
+All "all" = "everything" / "all" { return "all"; }
 
 SpecialSignal
   = Each / Any / All

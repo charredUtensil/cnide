@@ -1,0 +1,18 @@
+.networked {
+  margin: 24px 0 26px;
+}
+.wires.input {
+  text-align: right;
+  top: initial;
+  right: initial;
+  bottom: 100%;
+  left: 0;
+  margin-right: 2em;
+}
+.wires.output {
+  bottom: initial;
+  left: initial;
+  top: 100%;
+  right: 0;
+  margin-left: 2em;
+}

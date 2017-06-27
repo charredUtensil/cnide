@@ -200,16 +200,16 @@ parser = /*
         peg$c44 = peg$literalExpectation("each", false),
         peg$c45 = function() { return "each"; },
         peg$c46 = peg$otherExpectation("any"),
-        peg$c47 = "any",
-        peg$c48 = peg$literalExpectation("any", false),
-        peg$c49 = "anything",
-        peg$c50 = peg$literalExpectation("anything", false),
+        peg$c47 = "anything",
+        peg$c48 = peg$literalExpectation("anything", false),
+        peg$c49 = "any",
+        peg$c50 = peg$literalExpectation("any", false),
         peg$c51 = function() { return "any"; },
         peg$c52 = peg$otherExpectation("all"),
-        peg$c53 = "all",
-        peg$c54 = peg$literalExpectation("all", false),
-        peg$c55 = "everything",
-        peg$c56 = peg$literalExpectation("everything", false),
+        peg$c53 = "everything",
+        peg$c54 = peg$literalExpectation("everything", false),
+        peg$c55 = "all",
+        peg$c56 = peg$literalExpectation("all", false),
         peg$c57 = function() { return "all"; },
         peg$c58 = peg$otherExpectation("arithmetic operator"),
         peg$c59 = /^[+\-*\/%&|\^]/,
@@ -1026,18 +1026,18 @@ parser = /*
       var s0, s1;
 
       peg$silentFails++;
-      if (input.substr(peg$currPos, 3) === peg$c47) {
+      if (input.substr(peg$currPos, 8) === peg$c47) {
         s0 = peg$c47;
-        peg$currPos += 3;
+        peg$currPos += 8;
       } else {
         s0 = peg$FAILED;
         if (peg$silentFails === 0) { peg$fail(peg$c48); }
       }
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
-        if (input.substr(peg$currPos, 8) === peg$c49) {
+        if (input.substr(peg$currPos, 3) === peg$c49) {
           s1 = peg$c49;
-          peg$currPos += 8;
+          peg$currPos += 3;
         } else {
           s1 = peg$FAILED;
           if (peg$silentFails === 0) { peg$fail(peg$c50); }
@@ -1061,18 +1061,18 @@ parser = /*
       var s0, s1;
 
       peg$silentFails++;
-      if (input.substr(peg$currPos, 3) === peg$c53) {
+      if (input.substr(peg$currPos, 10) === peg$c53) {
         s0 = peg$c53;
-        peg$currPos += 3;
+        peg$currPos += 10;
       } else {
         s0 = peg$FAILED;
         if (peg$silentFails === 0) { peg$fail(peg$c54); }
       }
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
-        if (input.substr(peg$currPos, 10) === peg$c55) {
+        if (input.substr(peg$currPos, 3) === peg$c55) {
           s1 = peg$c55;
-          peg$currPos += 10;
+          peg$currPos += 3;
         } else {
           s1 = peg$FAILED;
           if (peg$silentFails === 0) { peg$fail(peg$c56); }

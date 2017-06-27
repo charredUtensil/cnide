@@ -251,6 +251,10 @@
     combinatorCssClassList_() {
       return ['pulse', 'button', 'constant', 'combinator']
     }
+    
+    faIcons_() {
+      return {active: 'dot-circle-o', inactive: 'circle-o'};
+    }
   }
   
   /**
@@ -414,7 +418,7 @@
       if (!this.isAny && !this.isAll) {
         return this.compare_(values, this.left, this.right);
       }
-      for (const k of Object.keys(input)) {
+      for (const k of Object.keys(values)) {
         const condition = this.compare_(input, k, this.right);
         if (this.isAny && condition) { return true; }
         if (this.isAll && !condition) { return false; }

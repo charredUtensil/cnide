@@ -9,8 +9,8 @@ body {
   width: 100%;
   height: 100%;
   margin: 0px;
-  background: #212121;
-  color: #FFF;
+  background: #123;
+  color: #fff;
   font-family: 'Overpass Mono', monospace;
   font-size: 14px;
   line-height: 100%;
@@ -28,7 +28,9 @@ body {
   height: 48px;
   overflow: hidden;
   white-space: pre;
-  transition: background-color 0.3s ease-in-out;
+  z-index: 1;
+  box-shadow: 0 0px 4px black;
+  transition: background 0.3s ease-in-out;
 }
 .menu .btn {
   display: inline-block;
@@ -74,7 +76,7 @@ body {
       opacity 0.3s ease-out;
 }
 .menu .edit .btn {
-  color: #FFF;
+  color: #fff;
 }
 .menu .run .btn {
   color: #e69100;
@@ -142,6 +144,7 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
+  background: #222;
   transition: left 0.3s ease-out;
 }
 .network-wrapper > .debug-wrapper {
@@ -296,10 +299,10 @@ body {
   background: #444;
 }
 .combinator.constant.button:not(.active) .signal {
-  color: #526d82;
+  color: #579;
 }
 .combinator.constant.button:not(.active) .value {
-  color: #7b7b7b;
+  color: #777;
 }
 .combinator.constant.button.active {
   background: #610704;
@@ -312,17 +315,17 @@ body {
 
 
 .combinator.arithmetic {
-  background: #28515d;
+  background: #223c55;
 }
 
 
 .combinator.decider {
-  background: #72561d;
+  background: #443d22;
 }
 
 
 .combinator.display {
-  background: #349234;
+  background: #252;
   line-height: normal;
   text-align: right;
 }
@@ -338,7 +341,7 @@ body {
   margin: 0 0 10px;
   padding: 0 0 10px;
   background: #333;
-  color: #ddd;
+  color: #ccc;
   border-radius: 20px;
 }
 .networked.subnetwork > .header {
@@ -348,6 +351,7 @@ body {
 .networked.subnetwork > .header > .btn {
   position: absolute;
   right: 10px;
+  color: #e69100;
   transition: opacity 0.3s ease-in;
 }
 .networked.subnetwork:not(.collapsed) > .header > .btn.uncollapse {
@@ -357,7 +361,7 @@ body {
   height: 120px;
   background: #333;
   transition:
-      height 0.3s ease-in-out,
+      height 0.3s ease-out,
       opacity 0.3s ease-out;
 }
 .networked.subnetwork > .debug-wrapper > .debug > table > tr:nth-child(odd) {
@@ -367,7 +371,7 @@ body {
   height: 0;
   opacity: 0;
   transition:
-      height 0.3s ease-in-out,
+      height 0.3s ease-in,
       opacity 0.3s ease-in;
 }
 .networked.subnetwork > .children {
@@ -394,7 +398,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #212121;
+  background: #222;
   border-radius: 20px;
 }
 
@@ -412,21 +416,25 @@ body {
 
 /* Signals */
 .value {
-  color: #FFF
+  color: #fff
 }
 .signal {
-  color: #8abce2;
+  color: #8be;
 }
 .signal.all {
-  color: #ff5e5e;
+  color: #f55;
 }
 .signal.any {
-  color: #40bd40;
+  color: #3e3;
 }
 .signal.each {
-  color: #fffe31;
+  color: #ff3;
 }
-.operator {
-  color: #feff35;
+.arithmetic .operator {
+  color: #ff3;
+  font-weight: bold;
+}
+.decider .operator {
+  color: #3e3;
   font-weight: bold;
 }
