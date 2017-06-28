@@ -10,15 +10,20 @@
     }
   }
   
+  const MAX_INT = 2147483647;
+  
   /**
    * Modifies the "to" object to add every value for every key from the "from" object.
    * This essentially "merges" two wire values together to form the final result.
-   * Keys with a value of 0 are removed.
+   * Keys with a value of 0 are removed. Values are clamped within -MAX_INT...MAX_INT.
    */
   const mergeSignals_ = function(to, from) {
     for (const k of Object.keys(from)) {
-      to[k] = (to[k] || 0) + from[k];
-      if (!to[k]) {
+      const result = (to[k] || 0) + from[k];
+      if (result) {
+        to[k] = result <= -MAX_INT ? -MAX_INT :
+                result >= MAX_INT ? MAX_INT : result;
+      } else {
         delete to[k];
       }
     }
