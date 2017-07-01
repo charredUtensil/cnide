@@ -135,6 +135,21 @@ body {
       left 0.3s ease-in,
       opacity 0.3s ease-in;
 }
+body.fatal .editor-wrapper .menu {
+  background-color: red;
+}
+body.fatal .editor-wrapper .menu .edit,
+body.fatal .editor-wrapper .menu .run {
+  display: none;
+}
+body.fatal .editor-wrapper .menu::after {
+  content: "Fatal error";
+  display: block;
+  width: 100%;
+  line-height: 48px;
+  height: 48px;
+  text-align: center;
+}
 
 
 /* Network */

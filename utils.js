@@ -1,7 +1,7 @@
 const utils = (function(){
-  const u = {};
+  const utils = {};
   
-  u.createHtmlElement = function(parent, tag, classList, text) {
+  utils.createHtmlElement = function(parent, tag, classList, text) {
     const element = document.createElement(tag);
     if (classList) {
       for (c of classList){
@@ -17,7 +17,7 @@ const utils = (function(){
     return element;
   }
   
-  u.factorioHumanize = function(value) {
+  utils.factorioHumanize = function(value) {
     const negate = value < 0;
     let v = negate ? -value : value;
     let suffixIndex = 0;
@@ -40,7 +40,12 @@ const utils = (function(){
     
     initElement(element) {}
   }
-  u.Renderable = Renderable;
+  utils.Renderable = Renderable;
   
-  return u;
+  return utils;
 })();
+
+window.onerror = function() {
+  document.body.classList.add('fatal');
+  return false;
+}

@@ -1,4 +1,4 @@
-(function(){
+const network = (function(){
   /** Returns the list of classes for a given value, signal, or special signal. */
   const htmlClassListForSignal_ = function(signal) {
     if (signal == 'all' || signal == 'any' || signal == 'each') {
@@ -424,7 +424,7 @@
         return this.compare_(values, this.left, this.right);
       }
       for (const k of Object.keys(values)) {
-        const condition = this.compare_(input, k, this.right);
+        const condition = this.compare_(values, k, this.right);
         if (this.isAny && condition) { return true; }
         if (this.isAll && !condition) { return false; }
       }
@@ -631,5 +631,7 @@
   network.Display = Display;
   network.CircuitSubNetwork = CircuitSubNetwork;
   network.Comment = Comment;
-  window.network = network;
+  return network;
 })();
+
+window.network = network;
