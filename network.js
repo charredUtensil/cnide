@@ -176,9 +176,12 @@ const network = (function(){
   
   /** A combinator which always outputs a constant value. */
   class ConstantCombinator extends Combinator {
-  	constructor(outputs, values) {
+  	constructor(outputs, ...args) {
       super([], outputs);
-      this.values = values;
+      this.values = {};
+      for (let i = 0; i < args.length; i += 2) {
+        this.values[args[i]] = args[i + 1];
+      }
     }
     
     /** @Override */
@@ -206,11 +209,7 @@ const network = (function(){
   
   /** A constant combinator that is turned on/off by clicking on it. */
   class ToggleButton extends ConstantCombinator {
-  	constructor(outputs, values) {
-      super(outputs, values);
-      this.active = false;
-    }
-    
+  
     /** @Override */
     getOutput(inputs) {
       return this.active ? super.getOutput(inputs) : {};

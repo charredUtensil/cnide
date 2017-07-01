@@ -180,7 +180,12 @@ ConstantCombinator
     "->" _ outputs:WirePair
     {
       const klass = kind ? kind[0] : network.ConstantCombinator
-      return new Statement(location(), klass, outputs, values);
+      const args = [];
+      for (const key of Object.keys(values)) {
+        args.push(key);
+        args.push(values[key]);
+      }
+      return new Statement(location(), klass, outputs, ...args);
     }
 
 ValueAsValueArithmeticCombinator
