@@ -43,11 +43,25 @@ See [the Factorio wiki](https://wiki.factorio.com/Virtual_signals#Each) for deta
 For convenience, Cnide accepts `all` and `any` as aliases for `everything` and `anything`, respectively.
 
 ### Whitespace and Comments
-A comment begins with a double slash (as in C/Java/JavaScript) and ends with a line break.
-There are no multi line comments.
-Whitespace is ignored and usually optional.
-Line breaks have no special syntactic meaning except to end a comment.
+Whitespace is ignored by the parser and usually optional.
+Line breaks have no special syntactic meaning except to end a single-line comment.
+
+Comments work as they do in C/Java/JavaScript:
+from `//` to the end of the line or between a `/*` and `*/`.
+Comments are treated as whitespace.
 - `// This is a comment.`
+- `/* This is a comment, too. */`
+
+### Labels
+Labels are another "form" of comment.
+They are treated as complete statements and are visible in the exported code, whereas comments are not.
+Labels begin with a `#` and end at the end of the line.
+As in Markdown, `##` or `###` may be used instead for less important and smaller text.
+
+    # Control Panel
+    ## Add Iron
+    ## Add Copper
+    ## Reset
 
 ### Arithmetic Combinators
 Arithmetic combinators are, in order:
