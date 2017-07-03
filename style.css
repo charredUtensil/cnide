@@ -418,13 +418,17 @@ body.fatal .editor-wrapper .menu::after {
 }
 
 
-.networked.comment {
+.networked.label {
   margin: 10px 0;
   width: 100%;
   white-space: pre-line;
 }
-.networked.comment:first-line {
+.networked.label.h1 {
   font-size: 2em;
+  line-height: 100%;
+}
+.networked.label.h2 {
+  font-size: 1.5em;
   line-height: 100%;
 }
 

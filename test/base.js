@@ -1,9 +1,20 @@
 const TESTS = {};
 
 const testUtils = (function() {
-  const assert = function(state, message) {
+  class AssertionError extends Error {
+    constructor(args) {
+      super(args.shift());
+      this.args = args;
+    }
+    
+    log() {
+      console.log(this.message, ...this.args);
+    }
+  }
+  
+  const assert = function(state, ...args) {
     if (!state) {
-      throw message;
+      throw new AssertionError(args);
     }
   }
 
@@ -24,8 +35,8 @@ const testUtils = (function() {
         tr.classList.add('fail');
         utils.createHtmlElement(tr, 'td', [], 'FAILED');
         console.error('%s FAILED', test);
-        if (Array.isArray(e)) {
-          console.log(...e);
+        if (e.log) {
+          e.log();
         } else {
           console.log(e);
         }

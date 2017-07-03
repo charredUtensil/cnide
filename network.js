@@ -600,17 +600,18 @@ const network = (function(){
     }
   }
   
-  class Comment extends Networked {
-    constructor(text) {
+  class Label extends Networked {
+    constructor(text, level) {
       super();
       this.text = text;
+      this.level = Math.min(level, 3);
     }
     
     step(state, newState) {}
     
     initElement(root) {
       super.initElement(root);
-      root.classList.add('comment');
+      root.classList.add('label', 'h' + this.level);
       root.textContent = this.text;
     }
   }
@@ -629,7 +630,7 @@ const network = (function(){
   network.FilterDeciderCombinator = FilterDeciderCombinator;
   network.Display = Display;
   network.CircuitSubNetwork = CircuitSubNetwork;
-  network.Comment = Comment;
+  network.Label = Label;
   return network;
 })();
 

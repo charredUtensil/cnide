@@ -97,17 +97,20 @@ CnideProgram
       return networks["Main"].bind(networks, {}, {}, true /* main */);
     }
 
+Comment "comment"
+  = "//" [ \t]* text:$[^\n]*
+  / "/*" ([^*]+ / "*" !"/")* "*/"
+
 _ "whitespace"
-  = [ \t\n\r]*
+  = ([ \t\n\r]+ / Comment)*
 
 As = "as"
 Then = "then"
-Export = "export"
 
 ReservedWord
   = SpecialSignal
   / ButtonKind
-  / As / Then / Export
+  / As / Then
 
 // Network Name
 NetworkName "network name"
@@ -277,11 +280,6 @@ Display
       return new Statement(location(), network.Display, inputs, signal);
     }
 
-ExportStatement
-  = Export _ exported:(Wire / Signal) {
-      return new ExportStatement(location(), exported);
-    }
-
 SingleBinding
   = key:Wire _ "=" _ value:Wire {
     return {kind: 'wires', key: key, value: value}; }
@@ -320,20 +318,9 @@ SubNetworkReference
         location(), name, bindings.wires, bindings.signals);
   }
   
-SingleLineComment
-  = "//" [ \t]* comment:$[^\n]* { return comment; }
-
-Comment
-  = first:SingleLineComment rest:([\n] _ SingleLineComment)* {
-      if (!rest[0]) {
-        return new Statement(location(), network.Comment, first);
-      }
-      let otherLines = [];
-      for (const line of rest) {
-        otherLines.push(line[2]);
-      }
-      return new Statement(location(),
-          network.Comment, first + '\n' + otherLines.join(' '));
+Label
+  = level:$"#"+ [ \t]* text:$[^\n]* {
+      return new Statement(location(), network.Label, text, level.length);
     }
     
 Statement
@@ -342,7 +329,7 @@ Statement
   / DeciderCombinator
   / Display
   / SubNetworkReference
-  / Comment
+  / Label
 
 NetworkParameters
   = first:(Wire / Signal) _ "," _ rest:NetworkParameters {

@@ -2,13 +2,13 @@
   const assertStateEquals = function(expected, actual) {
     const message = ["Expected %o but was %o", expected, actual];
     const wires = Object.keys(expected);
-    testUtils.assert(wires.length == Object.keys(actual).length, message);
+    testUtils.assert(wires.length == Object.keys(actual).length, ...message);
     for (const wire of wires) {
-      testUtils.assert(wire in actual, message);
+      testUtils.assert(wire in actual, ...message);
       const signals = Object.keys(expected[wire]);
-      testUtils.assert(signals.length == Object.keys(actual[wire]).length, message);
+      testUtils.assert(signals.length == Object.keys(actual[wire]).length, ...message);
       for (const signal of signals) {
-        testUtils.assert(expected[wire][signal] === actual[wire][signal], message);
+        testUtils.assert(expected[wire][signal] === actual[wire][signal], ...message);
       }
     }
   }
@@ -53,8 +53,6 @@
       'each > 10 then 1 as x', { 'x': 2 });
   
   // Special Signal All
-  TESTS.simulate_allAsSignal = () => testSingleCombinator(
-      'all + 10 as x', { 'x': 4 + 13 + 612 + 10 });
   TESTS.simulate_allThen1AsSignal_noneTrue = () => testSingleCombinator(
       'all > 0 then 1 as x', { 'x': 1 });
   TESTS.simulate_allThen1AsSignal_someTrue = () => testSingleCombinator(
