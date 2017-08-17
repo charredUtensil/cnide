@@ -1,0 +1,592 @@
+/* Definitions */
+@mixin small {
+  @media screen and (max-width: 520px) {
+    @content;
+  }
+}
+
+@mixin big {
+  @media screen and (min-width: 800px) {
+    @content;
+  }
+}
+
+$font-size: 14px;
+$menu-height: 48px;
+$blueprint-networked-height: 96px;
+
+
+
+/* Generics and Reset */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  color: #fff;
+  font-family: 'Overpass Mono', monospace;
+  font-size: $font-size;
+  line-height: $font-size;
+}
+
+.hidden {
+  display: none;
+}
+
+
+/* Menu */
+.menu {
+  position: relative;
+  height: $menu-height;
+  overflow: hidden;
+  white-space: pre;
+  z-index: 1;
+  box-shadow: 0 0px 4px black;
+  transition: background 0.3s ease-in-out;
+  .btn {
+    display: inline-block;
+    position: relative;
+    width: 24px;
+    height: $menu-height;
+    padding: 0 10px;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    transition: background 0.3s ease-out;
+    &.right {
+      float: right;
+    }
+    &:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .icon {
+      font-size: 24px;
+      line-height: 100%;
+      top: 5px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      position: absolute;
+    }
+    .text {
+      font-size: 10px;
+      line-height: 100%;
+      bottom: 5px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      position: absolute;
+    }
+  }  
+  .edit .btn {
+    color: #fff;
+  }
+  .run .btn {
+    color: #e69100;
+  }
+  .export .btn {
+    color: #fff;
+  }
+}
+
+
+/* Editor */
+.editor-wrapper {
+  width: 100%;
+  height: 100%;
+  transition: background 0.3s ease-in-out;
+  .editor {
+    position: absolute;
+    top: $menu-height;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow-y: scroll;
+    transition: left 0.3s ease-out;
+    & > textarea {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      padding: 2px 10px;
+      box-sizing: border-box;
+      background: transparent;
+      color: #FFF;
+      border: none;
+      font-family: 'Overpass Mono', monospace;
+      font-size: $font-size;
+      line-height: $font-size + 2px;
+      resize: none;
+    }
+  }
+  &.editing {
+    background: #123;
+    .menu {
+      background: #00bcd4;
+    }
+  }
+  &.running {
+    background: #222;
+    .menu {
+      background: #333;
+    }
+
+  }
+  &.exporting {
+    background: #283680;
+    .menu {
+      background: #66c;
+    }
+  }
+  body.fatal & {
+    .menu {
+      background-color: red;
+      .mode {
+        display: none;
+      }
+      &::after {
+        content: "Fatal error";
+        display: block;
+        width: 100%;
+        line-height: $menu-height;
+        height: $menu-height;
+        text-align: center;
+      }
+    }
+  }
+}
+
+
+/* Mode (for animated swipe transitions) */
+.mode {
+  position: absolute;
+  width: 100%;
+  &.edit {
+    left: -100%;
+    opacity: 0;
+    transition:
+        left 0.3s ease-in,
+        opacity 0.3s ease-in;
+  }
+  &.run, &.export {
+    left: 100%;
+    opacity: 0;
+    transition:
+        left 0.3s ease-in,
+        opacity 0.3s ease-in;
+  }
+}
+.editing .mode.edit,
+.running .mode.run,
+.exporting .mode.export {
+  left: 0;
+  opacity: initial;
+  transition:
+      left 0.3s ease-out,
+      opacity 0.3s ease-out;
+}
+.fatal-error-message {
+  position: absolute;
+  top: $menu-height;
+  width: 100%;
+  left: 0;
+  margin: auto;
+  padding: 20px 10%;
+  box-sizing: border-box;
+  background: rgba(255, 0, 0, 0.8);
+}
+
+
+/* Combinators & Signals (common) */
+.value {
+  color: #fff;
+}
+.signal {
+  color: #8be;
+  &.all {
+    color: #f55;
+  }
+  &.any {
+    color: #3e3;
+  }
+  &.each {
+    color: #ff3;
+  }
+}
+.operator {
+  font-weight: bold;
+  .arithmetic & {
+    color: #ff3;
+  }
+  .decider & {
+    color: #3e3;
+  }
+}
+.combinator {
+  background: #F00;
+  &.constant {
+    background: #610704;
+  }
+  &.arithmetic {
+    background: #223c55;
+  }
+  &.decider {
+    background: #443d22;
+  }
+  &.display {
+    background: #252;
+  }
+}
+
+
+/* Network */
+.network-wrapper {
+  top: $menu-height;
+  bottom: 0;
+  left: 0;
+  .debug-wrapper {
+    position: relative;
+    overflow: hidden;
+    &::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 10px;
+      background: linear-gradient(to bottom, #333 0%,rgba(0, 0, 0, 0) 100%);
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 10px;
+      bottom: 0;
+      background: linear-gradient(to top, #333 0%,rgba(0, 0, 0, 0) 100%);
+    }
+  }
+  & > .debug-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 220px;
+    background: #444;
+    @include small {
+      left: 0;
+      bottom: initial;
+      width: 100%;
+      height: 100px;
+    }
+    &::before {
+      background: linear-gradient(to bottom, #444 0%,rgba(0, 0, 0, 0) 100%);
+    }
+    &::after {
+      background: linear-gradient(to top, #444 0%,rgba(0, 0, 0, 0) 100%);
+    }
+    & > .debug > table > tr:nth-child(odd) {
+      background: #333;
+    }
+  }
+  .debug {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    height: 100%;
+    padding: 10px 0;
+    box-sizing: border-box;
+    .tick {
+      padding: 0px 10px 10px 10px;
+    }
+    table {
+      width: 100%;
+      border-spacing: 0;
+      font-size: 10px;
+      line-height: normal;
+    }
+    th {
+      text-align: left;
+      padding-left: 5px;
+      @include small {
+        padding-left: 20px;
+      }
+    }
+    .value {
+      text-align: right;
+      padding-right: 5px;
+      @include small {
+        padding-right: 20px;
+      }
+    }
+  }
+  .network  {
+    margin-right: 220px;
+    padding: 10px 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    @include small {
+      margin-right: 0px;
+      top: 100px;
+    }
+  }
+
+  /* Network Elements*/
+  .networked {
+    margin: 28px 0;
+    position: relative;
+    @include big {
+      margin: 0 100px 2px;
+    }
+    &.subnetwork {
+      margin: 0 0 10px;
+      padding: 0 0 10px;
+      background: #333;
+      color: #ccc;
+      border-radius: 20px;
+      & > .header {
+        padding: 10px;
+        margin-bottom: -10px;
+        & > .btn {
+          position: absolute;
+          right: 10px;
+          color: #e69100;
+          transition: opacity 0.3s ease-in;
+        }
+      }
+    }
+    &:not(.collapsed) > .header > .btn.uncollapse {
+      opacity: 0;
+    }
+    & > .debug-wrapper {
+      height: 120px;
+      background: #333;
+      transition:
+          height 0.3s ease-out,
+          opacity 0.3s ease-out;
+      & > .debug > table > tr:nth-child(odd) {
+        background: #444;
+      }
+    }
+    &.collapsed > .debug-wrapper {
+      height: 0;
+      opacity: 0;
+      transition:
+          height 0.3s ease-in,
+          opacity 0.3s ease-in;
+    }
+    & > .children {
+      position: relative;
+      padding: 20px 0;
+      overflow: hidden;
+      transition:
+          opacity 0.3s ease-out,
+          max-height 0.3s ease-in-out,
+          padding 0.3s ease-in-out;
+      & > .bg {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #222;
+        border-radius: 20px;
+      }
+    }
+    &.collapsed > .children {
+      opacity: 0;
+      max-height: 0;
+      padding: 0;
+      transition:
+          opacity 0.3s ease-in,
+          max-height 0.3s ease-in-out,
+          padding 0.3s ease-in-out;
+    }
+
+    &.label {
+      width: 100%;
+      white-space: pre-line;
+      @include big {
+        margin: 10px 0;
+      }
+      &.h1 {
+        font-size: 2em;
+        line-height: 100%;
+      }
+      &.h2 {
+        font-size: 1.5em;
+        line-height: 100%;
+      }
+    }
+  }
+
+  .wires {
+    font-size: 8px;
+    line-height: 100%;
+    position: absolute;
+    & > li {
+      list-style-type: none;
+    }
+    &.input {
+      text-align: right;
+      bottom: 100%;
+      left: 0;
+      margin-right: 2em;
+      @include big {
+        bottom: initial;
+        left: initial;
+        top: 0;
+        right: 100%;
+      }
+      & > li:after {
+        content: "->";
+        position: absolute;
+        right: -2em;
+      }
+    }
+    &.output {
+      top: 100%;
+      right: 0;
+      margin-left: 2em;
+      @include big {
+        top: initial;
+        right: initial;
+        bottom: 0;
+        left: 100%;
+      }
+      & > li:before {
+        content: "->";
+        position: absolute;
+        left: -2em;
+      }
+    }
+  }
+  .combinator {
+    border-radius: 5px;
+    padding: 2px 10px;
+    &.constant {
+      .values {
+        border-spacing: 0;
+        width: 100%;
+        .value {
+          text-align: right;
+        }
+      }
+      &.button {
+        background: #333;
+        padding: 4px 8px;
+        border: 2px dotted #e69100;
+        min-height: 2em;
+        cursor: pointer;
+        user-select: none;
+        .values {
+          padding-left: 40px;
+        }
+        .icon {
+          position: absolute;
+          top: 5px;
+          left: 10px;
+          font-size: 30px;
+          line-height: 100%;
+          color: #e69100;
+        }
+        &.active {
+          background: #610704;
+          border: 2px solid #e69100;
+          .icon.inactive {
+            display: none;
+          }
+        }
+        &:not(.active) {
+          &:hover {
+            background: #444;
+          }
+          .signal {
+            color: #579;
+          }
+          .value {
+            color: #777;
+          }
+          .icon.active {
+            display: none;
+          }
+        }
+      }
+    }
+    &.display {
+      line-height: normal;
+      text-align: right;
+      .signal {
+        float: left;
+      }
+      .value {
+        font-size: 24px;
+      }
+    }
+  }
+}
+
+/* Blueprint */
+.blueprint-wrapper {
+  top: $menu-height;
+  bottom: 0;
+  left: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  .blueprint-grid {
+    width: 100%;
+    .row {
+      height: $blueprint-networked-height;
+    }
+  }
+  .blueprint-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+  .networked {
+    box-sizing: border-box;
+    overflow: hidden;
+    display: inline-block;
+    padding: 5px;
+    width: 20%;
+    height: 100%;
+  }
+  .combinator {
+    width: 100%;
+    height: 100%;
+    padding: 2px;
+    font-size: 6px;
+    @include small {
+		    & > * {
+		      display: none;
+		    }
+		    .operator {
+		      display: block;
+		      margin: auto;
+		      height: 24px;
+		      width: 24px;
+		      font-size: 24px;
+		      line-height: $blueprint-networked-height - 10px;
+		      text-align: center;
+		    }
+    }
+  }
+  .wires {
+    display: none;
+  }
+}

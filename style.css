@@ -1,26 +1,24 @@
+/* Definitions */
 /* Generics and Reset */
 * {
   margin: 0;
-  padding: 0;
-}
+  padding: 0; }
 
+html {
+  width: 100%;
+  height: 100%; }
 
 body {
   width: 100%;
   height: 100%;
   margin: 0px;
-  background: #123;
   color: #fff;
   font-family: 'Overpass Mono', monospace;
   font-size: 14px;
-  line-height: 100%;
-}
-
+  line-height: 14px; }
 
 .hidden {
-  display: none;
-}
-
+  display: none; }
 
 /* Menu */
 .menu {
@@ -30,430 +28,421 @@ body {
   white-space: pre;
   z-index: 1;
   box-shadow: 0 0px 4px black;
-  transition: background 0.3s ease-in-out;
-}
-.menu .btn {
-  display: inline-block;
-  position: relative;
-  width: 24px;
-  height: 48px;
-  padding: 0 10px;
-  cursor: pointer;
-  user-select: none;
-  text-decoration: none;
-}
-.menu .btn.right {
-  float: right;
-}
-.menu .btn .icon {
-  font-size: 24px;
-  line-height: 100%;
-  top: 5px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  position: absolute;
-}
-.menu .btn .text {
-  font-size: 10px;
-  line-height: 100%;
-  bottom: 5px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  position: absolute;
-}
-.menu .btn:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
-.menu .edit,
-.menu .run {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  transition:
-      left 0.3s ease-out,
-      opacity 0.3s ease-out;
-}
-.menu .edit .btn {
-  color: #fff;
-}
-.menu .run .btn {
-  color: #e69100;
-}
-
+  transition: background 0.3s ease-in-out; }
+  .menu .btn {
+    display: inline-block;
+    position: relative;
+    width: 24px;
+    height: 48px;
+    padding: 0 10px;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    transition: background 0.3s ease-out; }
+    .menu .btn.right {
+      float: right; }
+    .menu .btn:hover {
+      background: rgba(255, 255, 255, 0.16); }
+    .menu .btn .icon {
+      font-size: 24px;
+      line-height: 100%;
+      top: 5px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      position: absolute; }
+    .menu .btn .text {
+      font-size: 10px;
+      line-height: 100%;
+      bottom: 5px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      position: absolute; }
+  .menu .edit .btn {
+    color: #fff; }
+  .menu .run .btn {
+    color: #e69100; }
+  .menu .export .btn {
+    color: #fff; }
 
 /* Editor */
-.editor {
+.editor-wrapper {
+  width: 100%;
+  height: 100%;
+  transition: background 0.3s ease-in-out; }
+  .editor-wrapper .editor {
+    position: absolute;
+    top: 48px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow-y: scroll;
+    transition: left 0.3s ease-out; }
+    .editor-wrapper .editor > textarea {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      padding: 2px 10px;
+      box-sizing: border-box;
+      background: transparent;
+      color: #FFF;
+      border: none;
+      font-family: 'Overpass Mono', monospace;
+      font-size: 14px;
+      line-height: 16px;
+      resize: none; }
+  .editor-wrapper.editing {
+    background: #123; }
+    .editor-wrapper.editing .menu {
+      background: #00bcd4; }
+  .editor-wrapper.running {
+    background: #222; }
+    .editor-wrapper.running .menu {
+      background: #333; }
+  .editor-wrapper.exporting {
+    background: #283680; }
+    .editor-wrapper.exporting .menu {
+      background: #66c; }
+  body.fatal .editor-wrapper .menu {
+    background-color: red; }
+    body.fatal .editor-wrapper .menu .mode {
+      display: none; }
+    body.fatal .editor-wrapper .menu::after {
+      content: "Fatal error";
+      display: block;
+      width: 100%;
+      line-height: 48px;
+      height: 48px;
+      text-align: center; }
+
+/* Mode (for animated swipe transitions) */
+.mode {
+  position: absolute;
+  width: 100%; }
+  .mode.edit {
+    left: -100%;
+    opacity: 0;
+    transition: left 0.3s ease-in, opacity 0.3s ease-in; }
+  .mode.run, .mode.export {
+    left: 100%;
+    opacity: 0;
+    transition: left 0.3s ease-in, opacity 0.3s ease-in; }
+
+.editing .mode.edit,
+.running .mode.run,
+.exporting .mode.export {
+  left: 0;
+  opacity: initial;
+  transition: left 0.3s ease-out, opacity 0.3s ease-out; }
+
+.fatal-error-message {
   position: absolute;
   top: 48px;
-  bottom: 0;
-  left: 0;
   width: 100%;
-  overflow-y: scroll;
-  transition: left 0.3s ease-out;
-}
-.editor > textarea {
-  position: absolute;
-  top: 0;
-  bottom: 0;
   left: 0;
-  right: 0;
-  width: 100%;
-  padding: 2px 10px;
+  margin: auto;
+  padding: 20px 10%;
   box-sizing: border-box;
-  background: transparent;
-  color: #FFF;
-  border: none;
-  font-family: 'Overpass Mono', monospace;
-  font-size: 14px;
-  line-height: 18px;
-  resize: none;
-}
+  background: rgba(255, 0, 0, 0.8); }
 
+/* Combinators & Signals (common) */
+.value {
+  color: #fff; }
 
-/* UI Transitions */
-.editing .menu {
-  background-color: #00bcd4;
-}
-.running .menu {
-  background-color: #333;
-}
-.editing .menu .run,
-.editing .network-wrapper {
-  left: 100%;
-  opacity: 0;
-  transition:
-      left 0.3s ease-in,
-      opacity 0.3s ease-in;
-}
-.running .menu .edit,
-.running .editor {
-  left: -100%;
-  opacity: 0;
-  transition:
-      left 0.3s ease-in,
-      opacity 0.3s ease-in;
-}
-body.fatal .editor-wrapper .menu {
-  background-color: red;
-}
-body.fatal .editor-wrapper .menu .edit,
-body.fatal .editor-wrapper .menu .run {
-  display: none;
-}
-body.fatal .editor-wrapper .menu::after {
-  content: "Fatal error";
-  display: block;
-  width: 100%;
-  line-height: 48px;
-  height: 48px;
-  text-align: center;
-}
+.signal {
+  color: #8be; }
+  .signal.all {
+    color: #f55; }
+  .signal.any {
+    color: #3e3; }
+  .signal.each {
+    color: #ff3; }
 
+.operator {
+  font-weight: bold; }
+  .arithmetic .operator {
+    color: #ff3; }
+  .decider .operator {
+    color: #3e3; }
+
+.combinator {
+  background: #F00; }
+  .combinator.constant {
+    background: #610704; }
+  .combinator.arithmetic {
+    background: #223c55; }
+  .combinator.decider {
+    background: #443d22; }
+  .combinator.display {
+    background: #252; }
 
 /* Network */
 .network-wrapper {
-  position: absolute;
   top: 48px;
   bottom: 0;
   left: 0;
-  width: 100%;
-  background: #222;
-  transition: left 0.3s ease-out;
-}
-.network-wrapper > .debug-wrapper {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 220px;
-  background: #444;
-}
-.network-wrapper > .debug-wrapper::before {
-  background: linear-gradient(to bottom, #444 0%,rgba(0, 0, 0, 0) 100%);
-}
-.network-wrapper > .debug-wrapper::after {
-  background: linear-gradient(to top, #444 0%,rgba(0, 0, 0, 0) 100%);
-}
-.network-wrapper > .debug-wrapper > .debug > table > tr:nth-child(odd) {
-  background: #333;
-}
+  /* Network Elements*/ }
+  .network-wrapper .debug-wrapper {
+    position: relative;
+    overflow: hidden; }
+    .network-wrapper .debug-wrapper::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 10px;
+      background: linear-gradient(to bottom, #333 0%, transparent 100%); }
+    .network-wrapper .debug-wrapper::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 10px;
+      bottom: 0;
+      background: linear-gradient(to top, #333 0%, transparent 100%); }
+  .network-wrapper > .debug-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 220px;
+    background: #444; }
+    @media screen and (max-width: 520px) {
+      .network-wrapper > .debug-wrapper {
+        left: 0;
+        bottom: initial;
+        width: 100%;
+        height: 100px; } }
+    .network-wrapper > .debug-wrapper::before {
+      background: linear-gradient(to bottom, #444 0%, transparent 100%); }
+    .network-wrapper > .debug-wrapper::after {
+      background: linear-gradient(to top, #444 0%, transparent 100%); }
+    .network-wrapper > .debug-wrapper > .debug > table > tr:nth-child(odd) {
+      background: #333; }
+  .network-wrapper .debug {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    height: 100%;
+    padding: 10px 0;
+    box-sizing: border-box; }
+    .network-wrapper .debug .tick {
+      padding: 0px 10px 10px 10px; }
+    .network-wrapper .debug table {
+      width: 100%;
+      border-spacing: 0;
+      font-size: 10px;
+      line-height: normal; }
+    .network-wrapper .debug th {
+      text-align: left;
+      padding-left: 5px; }
+      @media screen and (max-width: 520px) {
+        .network-wrapper .debug th {
+          padding-left: 20px; } }
+    .network-wrapper .debug .value {
+      text-align: right;
+      padding-right: 5px; }
+      @media screen and (max-width: 520px) {
+        .network-wrapper .debug .value {
+          padding-right: 20px; } }
+  .network-wrapper .network {
+    margin-right: 220px;
+    padding: 10px 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: scroll; }
+    @media screen and (max-width: 520px) {
+      .network-wrapper .network {
+        margin-right: 0px;
+        top: 100px; } }
+  .network-wrapper .networked {
+    margin: 28px 0;
+    position: relative; }
+    @media screen and (min-width: 800px) {
+      .network-wrapper .networked {
+        margin: 0 100px 2px; } }
+    .network-wrapper .networked.subnetwork {
+      margin: 0 0 10px;
+      padding: 0 0 10px;
+      background: #333;
+      color: #ccc;
+      border-radius: 20px; }
+      .network-wrapper .networked.subnetwork > .header {
+        padding: 10px;
+        margin-bottom: -10px; }
+        .network-wrapper .networked.subnetwork > .header > .btn {
+          position: absolute;
+          right: 10px;
+          color: #e69100;
+          transition: opacity 0.3s ease-in; }
+    .network-wrapper .networked:not(.collapsed) > .header > .btn.uncollapse {
+      opacity: 0; }
+    .network-wrapper .networked > .debug-wrapper {
+      height: 120px;
+      background: #333;
+      transition: height 0.3s ease-out, opacity 0.3s ease-out; }
+      .network-wrapper .networked > .debug-wrapper > .debug > table > tr:nth-child(odd) {
+        background: #444; }
+    .network-wrapper .networked.collapsed > .debug-wrapper {
+      height: 0;
+      opacity: 0;
+      transition: height 0.3s ease-in, opacity 0.3s ease-in; }
+    .network-wrapper .networked > .children {
+      position: relative;
+      padding: 20px 0;
+      overflow: hidden;
+      transition: opacity 0.3s ease-out, max-height 0.3s ease-in-out, padding 0.3s ease-in-out; }
+      .network-wrapper .networked > .children > .bg {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #222;
+        border-radius: 20px; }
+    .network-wrapper .networked.collapsed > .children {
+      opacity: 0;
+      max-height: 0;
+      padding: 0;
+      transition: opacity 0.3s ease-in, max-height 0.3s ease-in-out, padding 0.3s ease-in-out; }
+    .network-wrapper .networked.label {
+      width: 100%;
+      white-space: pre-line; }
+      @media screen and (min-width: 800px) {
+        .network-wrapper .networked.label {
+          margin: 10px 0; } }
+      .network-wrapper .networked.label.h1 {
+        font-size: 2em;
+        line-height: 100%; }
+      .network-wrapper .networked.label.h2 {
+        font-size: 1.5em;
+        line-height: 100%; }
+  .network-wrapper .wires {
+    font-size: 8px;
+    line-height: 100%;
+    position: absolute; }
+    .network-wrapper .wires > li {
+      list-style-type: none; }
+    .network-wrapper .wires.input {
+      text-align: right;
+      bottom: 100%;
+      left: 0;
+      margin-right: 2em; }
+      @media screen and (min-width: 800px) {
+        .network-wrapper .wires.input {
+          bottom: initial;
+          left: initial;
+          top: 0;
+          right: 100%; } }
+      .network-wrapper .wires.input > li:after {
+        content: "->";
+        position: absolute;
+        right: -2em; }
+    .network-wrapper .wires.output {
+      top: 100%;
+      right: 0;
+      margin-left: 2em; }
+      @media screen and (min-width: 800px) {
+        .network-wrapper .wires.output {
+          top: initial;
+          right: initial;
+          bottom: 0;
+          left: 100%; } }
+      .network-wrapper .wires.output > li:before {
+        content: "->";
+        position: absolute;
+        left: -2em; }
+  .network-wrapper .combinator {
+    border-radius: 5px;
+    padding: 2px 10px; }
+    .network-wrapper .combinator.constant .values {
+      border-spacing: 0;
+      width: 100%; }
+      .network-wrapper .combinator.constant .values .value {
+        text-align: right; }
+    .network-wrapper .combinator.constant.button {
+      background: #333;
+      padding: 4px 8px;
+      border: 2px dotted #e69100;
+      min-height: 2em;
+      cursor: pointer;
+      user-select: none; }
+      .network-wrapper .combinator.constant.button .values {
+        padding-left: 40px; }
+      .network-wrapper .combinator.constant.button .icon {
+        position: absolute;
+        top: 5px;
+        left: 10px;
+        font-size: 30px;
+        line-height: 100%;
+        color: #e69100; }
+      .network-wrapper .combinator.constant.button.active {
+        background: #610704;
+        border: 2px solid #e69100; }
+        .network-wrapper .combinator.constant.button.active .icon.inactive {
+          display: none; }
+      .network-wrapper .combinator.constant.button:not(.active):hover {
+        background: #444; }
+      .network-wrapper .combinator.constant.button:not(.active) .signal {
+        color: #579; }
+      .network-wrapper .combinator.constant.button:not(.active) .value {
+        color: #777; }
+      .network-wrapper .combinator.constant.button:not(.active) .icon.active {
+        display: none; }
+    .network-wrapper .combinator.display {
+      line-height: normal;
+      text-align: right; }
+      .network-wrapper .combinator.display .signal {
+        float: left; }
+      .network-wrapper .combinator.display .value {
+        font-size: 24px; }
 
-.network  {
-  margin-right: 220px;
-  padding: 10px 5px;
-  position: absolute;
-  top: 0;
-  right: 0;
+/* Blueprint */
+.blueprint-wrapper {
+  top: 48px;
   bottom: 0;
   left: 0;
   overflow-x: hidden;
-  overflow-y: scroll;
-}
-.debug-wrapper {
-  position: relative;
-  overflow: hidden;
-}
-.debug-wrapper::before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 10px;
-  background: linear-gradient(to bottom, #333 0%,rgba(0, 0, 0, 0) 100%);
-}
-.debug-wrapper::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 10px;
-  bottom: 0;
-  background: linear-gradient(to top, #333 0%,rgba(0, 0, 0, 0) 100%);
-}
-.debug {
-  overflow-x: hidden;
-  overflow-y: scroll;
-  height: 100%;
-  padding: 10px 0;
-  box-sizing: border-box;
-}
-.debug .tick {
-  padding: 0px 10px 10px 10px;
-}
-.debug table {
-  width: 100%;
-  border-spacing: 0;
-  font-size: 10px;
-  line-height: normal;
-}
-.debug th {
-  text-align: left;
-  padding-left: 5px;
-}
-.debug .value {
-  text-align: right;
-  padding-right: 5px;
-}
+  overflow-y: scroll; }
+  .blueprint-wrapper .blueprint-grid {
+    width: 100%; }
+    .blueprint-wrapper .blueprint-grid .row {
+      height: 96px; }
+  .blueprint-wrapper .blueprint-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0; }
+  .blueprint-wrapper .networked {
+    box-sizing: border-box;
+    overflow: hidden;
+    display: inline-block;
+    padding: 5px;
+    width: 20%;
+    height: 100%; }
+  .blueprint-wrapper .combinator {
+    width: 100%;
+    height: 100%;
+    padding: 2px;
+    font-size: 6px; }
+    @media screen and (max-width: 520px) {
+      .blueprint-wrapper .combinator > * {
+        display: none; }
+      .blueprint-wrapper .combinator .operator {
+        display: block;
+        margin: auto;
+        height: 24px;
+        width: 24px;
+        font-size: 24px;
+        line-height: 86px;
+        text-align: center; } }
+  .blueprint-wrapper .wires {
+    display: none; }
 
-/* Network Elements*/
-.networked {
-  margin: 0 80px 2px;
-  position: relative;
-}
-
-
-.wires {
-  font-size: 8px;
-  line-height: 100%;
-  position: absolute;
-}
-.wires.input {
-  text-align: right;
-  top: 0;
-  right: 100%;
-  margin-right: 2em;
-}
-.wires.output {
-  bottom: 0;
-  left: 100%;
-  margin-left: 2em;
-}
-.wires > li {
-  list-style-type: none;
-}
-.wires.input > li:after {
-  content: "->";
-  position: absolute;
-  right: -2em;
-}
-.wires.output > li:before {
-  content: "->";
-  position: absolute;
-  left: -2em;
-}
-
-
-/* Combinators */
-.combinator {
-  border-radius: 5px;
-  padding: 2px 10px;
-  background: #F00;
-}
-
-
-.combinator.constant {
-  background: #610704;
-}
-.combinator.constant .values {
-  border-spacing: 0;
-  width: 100%;
-}
-.combinator.constant .values .value {
-  text-align: right;
-}
-.combinator.constant.button {
-  background: #333;
-  padding: 4px 8px;
-  border: 2px dotted #e69100;
-  min-height: 2em;
-  cursor: pointer;
-  user-select: none;
-}
-.combinator.constant.button .values {
-  padding-left: 40px;
-}
-.combinator.constant.button .icon {
-  position: absolute;
-  top: 5px;
-  left: 10px;
-  font-size: 30px;
-  line-height: 100%;
-  color: #e69100;
-}
-.combinator.constant.button:not(.active):hover {
-  background: #444;
-}
-.combinator.constant.button:not(.active) .signal {
-  color: #579;
-}
-.combinator.constant.button:not(.active) .value {
-  color: #777;
-}
-.combinator.constant.button.active {
-  background: #610704;
-  border: 2px solid #e69100;
-}
-.combinator.constant.button.active .icon.inactive,
-.combinator.constant.button:not(.active) .icon.active {
-  display: none;
-}
-
-
-.combinator.arithmetic {
-  background: #223c55;
-}
-
-
-.combinator.decider {
-  background: #443d22;
-}
-
-
-.combinator.display {
-  background: #252;
-  line-height: normal;
-  text-align: right;
-}
-.combinator.display .signal {
-  float: left;
-}
-.combinator.display .value {
-  font-size: 24px;
-}
-
-
-.networked.subnetwork {
-  margin: 0 0 10px;
-  padding: 0 0 10px;
-  background: #333;
-  color: #ccc;
-  border-radius: 20px;
-}
-.networked.subnetwork > .header {
-  padding: 10px;
-  margin-bottom: -10px;
-}
-.networked.subnetwork > .header > .btn {
-  position: absolute;
-  right: 10px;
-  color: #e69100;
-  transition: opacity 0.3s ease-in;
-}
-.networked.subnetwork:not(.collapsed) > .header > .btn.uncollapse {
-  opacity: 0;
-}
-.networked.subnetwork > .debug-wrapper {
-  height: 120px;
-  background: #333;
-  transition:
-      height 0.3s ease-out,
-      opacity 0.3s ease-out;
-}
-.networked.subnetwork > .debug-wrapper > .debug > table > tr:nth-child(odd) {
-  background: #444;
-}
-.networked.subnetwork.collapsed > .debug-wrapper {
-  height: 0;
-  opacity: 0;
-  transition:
-      height 0.3s ease-in,
-      opacity 0.3s ease-in;
-}
-.networked.subnetwork > .children {
-  position: relative;
-  padding: 20px 0;
-  overflow: hidden;
-  transition:
-      opacity 0.3s ease-out,
-      max-height 0.3s ease-in-out,
-      padding 0.3s ease-in-out;
-}
-.networked.subnetwork.collapsed > .children {
-  opacity: 0;
-  max-height: 0;
-  padding: 0;
-  transition:
-      opacity 0.3s ease-in,
-      max-height 0.3s ease-in-out,
-      padding 0.3s ease-in-out;
-}
-.networked.subnetwork > .children > .bg {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #222;
-  border-radius: 20px;
-}
-
-
-.networked.label {
-  margin: 10px 0;
-  width: 100%;
-  white-space: pre-line;
-}
-.networked.label.h1 {
-  font-size: 2em;
-  line-height: 100%;
-}
-.networked.label.h2 {
-  font-size: 1.5em;
-  line-height: 100%;
-}
-
-
-/* Signals */
-.value {
-  color: #fff
-}
-.signal {
-  color: #8be;
-}
-.signal.all {
-  color: #f55;
-}
-.signal.any {
-  color: #3e3;
-}
-.signal.each {
-  color: #ff3;
-}
-.arithmetic .operator {
-  color: #ff3;
-  font-weight: bold;
-}
-.decider .operator {
-  color: #3e3;
-  font-weight: bold;
-}
+/*# sourceMappingURL=style.css.map */

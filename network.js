@@ -116,12 +116,23 @@ const network = (function(){
     }
   }
   
+  /**
+   * A pair of power poles.
+   * This is not used in the cnide emulator, since it performs no function.
+   * It is, however, used in blueprints when it would not otherwise be
+   * possible to connect the network otherwise.
+   */
+  class Pole extends Networked {
+    initElement(root) {
+      root.classList.add('pole');
+    }
+  }
+  
   class Combinator extends Networked {
     constructor(inputs, outputs) {
       super();
       this.inputs = inputs;
       this.outputs = outputs;
-      this.element = null;
     }
     
     /** @Override that delegates to getOutput() */
@@ -133,7 +144,7 @@ const network = (function(){
       const output = this.getOutput(input);
       for (const w of this.outputs) {
         newState[w] = newState[w] || {}
-      	mergeSignals_(newState[w], output);
+        mergeSignals_(newState[w], output);
       }
     }
     
@@ -150,7 +161,7 @@ const network = (function(){
     
     /** Parses an operand as a number or signal, returning the value. */
     opToNumber_(values, operand) {
-      if (typeof operand == "string") {
+      if (typeof operand == 'string') {
         return values[operand] || 0;
       } else {
         return operand;
@@ -317,7 +328,7 @@ const network = (function(){
       elem.innerHTML += ' ';
       utils.createHtmlElement(
         elem, 'span', htmlClassListForSignal_(this.right), this.right);
-      elem.innerHTML += ' as ';
+      utils.createHtmlElement(elem, 'span', ['as'], ' as ');
       utils.createHtmlElement(
         elem, 'span', htmlClassListForSignal_(this.outputSignal),
         this.outputSignal);
@@ -397,7 +408,7 @@ const network = (function(){
       utils.createHtmlElement(
           elem, 'span', htmlClassListForSignal_(this.right),
           this.right);
-      elem.innerHTML += ' then ';
+      utils.createHtmlElement(elem, 'span', ['then'], ' then ');
       if (this.asOne) {
         utils.createHtmlElement(
             elem, 'span', ['as'], '1 as ');
@@ -453,8 +464,7 @@ const network = (function(){
   }
   
   class SumDeciderCombinator extends DeciderCombinator {
-    constructor(inputs, outputs, operator, right, outputSignal,
-        asOne) {
+    constructor(inputs, outputs, operator, right, outputSignal, asOne) {
       super(inputs, outputs, operator);
       this.right = right;
       this.outputSignal = outputSignal;
@@ -631,6 +641,7 @@ const network = (function(){
   network.Display = Display;
   network.CircuitSubNetwork = CircuitSubNetwork;
   network.Label = Label;
+  network.Pole = Pole;
   return network;
 })();
 

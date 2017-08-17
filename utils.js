@@ -45,7 +45,11 @@ const utils = (function(){
   return utils;
 })();
 
-window.onerror = function() {
+window.onerror = function(msg) {
   document.body.classList.add('fatal');
+  try {
+    utils.createHtmlElement(
+        document.body, 'div', ['fatal-error-message'], msg);
+  } catch (e) {}
   return false;
 }
