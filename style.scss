@@ -13,8 +13,36 @@
 
 $font-size: 14px;
 $menu-height: 48px;
-$blueprint-networked-height: 96px;
+$combinator-height: 96px;
+$combinator-op-size: 30px;
+$combinator-op-font-size: 20px;
 
+$color-edit: #fff;
+$color-edit-bg: #123;
+$color-edit-menu: #fff;
+$color-edit-menu-bg: #00bcd4;
+$color-run-bg: #222;
+$color-run-menu: #e69100;
+$color-run-menu-bg: #333;
+$color-op-bg: #333;
+$color-op-bg-hover: #444;
+
+$color-dark-red: #610704;
+$color-dark-blue: #223c55;
+$color-dark-yellow: #443d22;
+$color-dark-green: #252;
+
+$color-light-red: #f55;
+$color-light-blue: #8be;
+$color-light-yellow: #ff3;
+$color-light-green: #3e3;
+
+$color-cta: $color-run-menu;
+
+$z-underlay: 1;
+$z-thumbnail: 2;
+$z-overlay: 3;
+$z-detail: 4;
 
 
 /* Generics and Reset */
@@ -88,13 +116,10 @@ body {
     }
   }  
   .edit .btn {
-    color: #fff;
+    color: $color-edit-menu;
   }
   .run .btn {
-    color: #e69100;
-  }
-  .export .btn {
-    color: #fff;
+    color: $color-run-menu;
   }
 }
 
@@ -122,7 +147,7 @@ body {
       padding: 2px 10px;
       box-sizing: border-box;
       background: transparent;
-      color: #FFF;
+      color: $color-edit;
       border: none;
       font-family: 'Overpass Mono', monospace;
       font-size: $font-size;
@@ -131,23 +156,17 @@ body {
     }
   }
   &.editing {
-    background: #123;
+    background: $color-edit-bg;
     .menu {
-      background: #00bcd4;
+      background: $color-edit-menu-bg;
     }
   }
   &.running {
-    background: #222;
+    background: $color-run-bg;
     .menu {
-      background: #333;
+      background: $color-run-menu-bg;
     }
 
-  }
-  &.exporting {
-    background: #283680;
-    .menu {
-      background: #66c;
-    }
   }
   body.fatal & {
     .menu {
@@ -179,7 +198,7 @@ body {
         left 0.3s ease-in,
         opacity 0.3s ease-in;
   }
-  &.run, &.export {
+  &.run {
     left: 100%;
     opacity: 0;
     transition:
@@ -188,8 +207,7 @@ body {
   }
 }
 .editing .mode.edit,
-.running .mode.run,
-.exporting .mode.export {
+.running .mode.run {
   left: 0;
   opacity: initial;
   transition:
@@ -208,44 +226,62 @@ body {
 }
 
 
-/* Combinators & Signals (common) */
+/* Signals (common) */
 .value {
   color: #fff;
 }
 .signal {
-  color: #8be;
+  color: $color-light-blue;
   &.all {
-    color: #f55;
+    color: $color-light-red;
   }
   &.any {
-    color: #3e3;
+    color: $color-light-green;
   }
   &.each {
-    color: #ff3;
+    color: $color-light-yellow;
   }
 }
-.operator {
-  font-weight: bold;
-  .arithmetic & {
-    color: #ff3;
-  }
-  .decider & {
-    color: #3e3;
-  }
-}
-.combinator {
-  background: #F00;
-  &.constant {
-    background: #610704;
-  }
-  &.arithmetic {
-    background: #223c55;
-  }
-  &.decider {
-    background: #443d22;
-  }
-  &.display {
-    background: #252;
+
+
+/* State Table */
+.state {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  font-size: 12px;
+  .wire {
+    &.red .name {
+      color: $color-light-red;
+    }
+    &.green .name {
+      color: $color-light-green;
+    }
+    table {
+      width: 100%;
+      border-spacing: 0;
+      font-size: 10px;
+      line-height: normal;
+      tr:nth-child(even) {
+        background: #333;
+      }
+      .signal {
+        text-align: left;
+        padding-left: 5px;
+        @include small {
+          padding-left: 20px;
+        }
+      }
+      .value {
+        text-align: right;
+        padding-right: 5px;
+        @include small {
+          padding-right: 20px;
+        }
+      }
+    }
   }
 }
 
@@ -255,32 +291,14 @@ body {
   top: $menu-height;
   bottom: 0;
   left: 0;
-  .debug-wrapper {
-    position: relative;
-    overflow: hidden;
-    &::before {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 10px;
-      background: linear-gradient(to bottom, #333 0%,rgba(0, 0, 0, 0) 100%);
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 10px;
-      bottom: 0;
-      background: linear-gradient(to top, #333 0%,rgba(0, 0, 0, 0) 100%);
-    }
-  }
-  & > .debug-wrapper {
+  .state-wrapper {
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     width: 220px;
     background: #444;
+    overflow: hidden;
     @include small {
       left: 0;
       bottom: initial;
@@ -288,43 +306,19 @@ body {
       height: 100px;
     }
     &::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 10px;
       background: linear-gradient(to bottom, #444 0%,rgba(0, 0, 0, 0) 100%);
     }
     &::after {
-      background: linear-gradient(to top, #444 0%,rgba(0, 0, 0, 0) 100%);
-    }
-    & > .debug > table > tr:nth-child(odd) {
-      background: #333;
-    }
-  }
-  .debug {
-    overflow-x: hidden;
-    overflow-y: scroll;
-    height: 100%;
-    padding: 10px 0;
-    box-sizing: border-box;
-    .tick {
-      padding: 0px 10px 10px 10px;
-    }
-    table {
+      content: "";
+      position: absolute;
       width: 100%;
-      border-spacing: 0;
-      font-size: 10px;
-      line-height: normal;
-    }
-    th {
-      text-align: left;
-      padding-left: 5px;
-      @include small {
-        padding-left: 20px;
-      }
-    }
-    .value {
-      text-align: right;
-      padding-right: 5px;
-      @include small {
-        padding-right: 20px;
-      }
+      height: 10px;
+      bottom: 0;
+      background: linear-gradient(to top, #444 0%,rgba(0, 0, 0, 0) 100%);
     }
   }
   .network  {
@@ -341,252 +335,163 @@ body {
       margin-right: 0px;
       top: 100px;
     }
-  }
-
-  /* Network Elements*/
-  .networked {
-    margin: 28px 0;
-    position: relative;
-    @include big {
-      margin: 0 100px 2px;
-    }
-    &.subnetwork {
-      margin: 0 0 10px;
-      padding: 0 0 10px;
-      background: #333;
-      color: #ccc;
-      border-radius: 20px;
-      & > .header {
-        padding: 10px;
-        margin-bottom: -10px;
-        & > .btn {
-          position: absolute;
-          right: 10px;
-          color: #e69100;
-          transition: opacity 0.3s ease-in;
-        }
-      }
-    }
-    &:not(.collapsed) > .header > .btn.uncollapse {
-      opacity: 0;
-    }
-    & > .debug-wrapper {
-      height: 120px;
-      background: #333;
-      transition:
-          height 0.3s ease-out,
-          opacity 0.3s ease-out;
-      & > .debug > table > tr:nth-child(odd) {
-        background: #444;
-      }
-    }
-    &.collapsed > .debug-wrapper {
-      height: 0;
-      opacity: 0;
-      transition:
-          height 0.3s ease-in,
-          opacity 0.3s ease-in;
-    }
-    & > .children {
-      position: relative;
-      padding: 20px 0;
-      overflow: hidden;
-      transition:
-          opacity 0.3s ease-out,
-          max-height 0.3s ease-in-out,
-          padding 0.3s ease-in-out;
-      & > .bg {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #222;
-        border-radius: 20px;
-      }
-    }
-    &.collapsed > .children {
-      opacity: 0;
-      max-height: 0;
-      padding: 0;
-      transition:
-          opacity 0.3s ease-in,
-          max-height 0.3s ease-in-out,
-          padding 0.3s ease-in-out;
-    }
-
-    &.label {
-      width: 100%;
-      white-space: pre-line;
-      @include big {
-        margin: 10px 0;
-      }
-      &.h1 {
-        font-size: 2em;
-        line-height: 100%;
-      }
-      &.h2 {
-        font-size: 1.5em;
-        line-height: 100%;
-      }
-    }
-  }
-
-  .wires {
-    font-size: 8px;
-    line-height: 100%;
-    position: absolute;
-    & > li {
-      list-style-type: none;
-    }
-    &.input {
-      text-align: right;
-      bottom: 100%;
+    .segments {
+      position: absolute;
+      top: 0;
       left: 0;
-      margin-right: 2em;
-      @include big {
-        bottom: initial;
-        left: initial;
-        top: 0;
-        right: 100%;
-      }
-      & > li:after {
-        content: "->";
-        position: absolute;
-        right: -2em;
-      }
-    }
-    &.output {
-      top: 100%;
+      bottom: 0;
       right: 0;
-      margin-left: 2em;
-      @include big {
-        top: initial;
-        right: initial;
-        bottom: 0;
-        left: 100%;
+      pointer-events: none;
+      &.underlay {
+        z-index: $z-underlay;
       }
-      & > li:before {
-        content: "->";
-        position: absolute;
-        left: -2em;
-      }
-    }
-  }
-  .combinator {
-    border-radius: 5px;
-    padding: 2px 10px;
-    &.constant {
-      .values {
-        border-spacing: 0;
-        width: 100%;
-        .value {
-          text-align: right;
-        }
-      }
-      &.button {
-        background: #333;
-        padding: 4px 8px;
-        border: 2px dotted #e69100;
-        min-height: 2em;
-        cursor: pointer;
-        user-select: none;
-        .values {
-          padding-left: 40px;
-        }
-        .icon {
-          position: absolute;
-          top: 5px;
-          left: 10px;
-          font-size: 30px;
-          line-height: 100%;
-          color: #e69100;
-        }
-        &.active {
-          background: #610704;
-          border: 2px solid #e69100;
-          .icon.inactive {
-            display: none;
-          }
-        }
-        &:not(.active) {
-          &:hover {
-            background: #444;
-          }
-          .signal {
-            color: #579;
-          }
-          .value {
-            color: #777;
-          }
-          .icon.active {
-            display: none;
-          }
-        }
-      }
-    }
-    &.display {
-      line-height: normal;
-      text-align: right;
-      .signal {
-        float: left;
-      }
-      .value {
-        font-size: 24px;
+      &.overlay {
+        z-index: $z-overlay;
       }
     }
   }
 }
 
-/* Blueprint */
-.blueprint-wrapper {
-  top: $menu-height;
-  bottom: 0;
-  left: 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  .blueprint-grid {
-    width: 100%;
-    .row {
-      height: $blueprint-networked-height;
+/* Combinators */
+@mixin combinator-colors($bg, $thumb-op, $detail-op) {
+  &.thumbnail {
+    &::before {
+      background: $bg;
+    }
+    .operator {
+      border-color: $thumb-op;
+      color: $thumb-op;
     }
   }
-  .blueprint-overlay {
+  &.detail {
+    background: $bg;
+    .operator {
+      color: $detail-op;
+    }
+  }
+}
+
+.combinator {
+  box-sizing: border-box;
+  overflow: hidden;
+  
+  .operator {
+    font-weight: bold;
+  }
+
+  &.thumbnail {
     position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-  }
-  .networked {
-    box-sizing: border-box;
-    overflow: hidden;
-    display: inline-block;
-    padding: 5px;
     width: 20%;
-    height: 100%;
+    height: $combinator-height;
+    z-index: $z-thumbnail;
+    .operator, .button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: $combinator-op-font-size;
+      text-align: center;
+      background: $color-op-bg;
+      height: $combinator-op-size;
+      width: $combinator-op-size;
+      line-height: $combinator-op-size;
+      border-radius: 5px;
+      border: 2px solid white;
+    }  
+		  &::before {
+		    content: '';
+		    border-radius: 5px;
+		    position: absolute;
+		    top: 5px;
+		    bottom: 5px;
+		    left: 15px;
+		    right: 15px;
+		  }
   }
-  .combinator {
-    width: 100%;
-    height: 100%;
-    padding: 2px;
-    font-size: 6px;
-    @include small {
-		    & > * {
-		      display: none;
-		    }
-		    .operator {
-		      display: block;
-		      margin: auto;
-		      height: 24px;
-		      width: 24px;
-		      font-size: 24px;
-		      line-height: $blueprint-networked-height - 10px;
-		      text-align: center;
-		    }
+  &.detail {
+    display: none;
+    z-index: $z-detail;
+  }
+  
+  &.constant {
+    @include combinator-colors($color-dark-red, black, black);
+  }
+  &.pulse {
+    .button {
+      border-color: $color-cta;
+      cursor: pointer;
+      user-select: none;
+      color: $color-cta;
+      &:hover {
+        background: $color-op-bg-hover;
+      }
+      .icon.active {
+        display: none;
+      }
+    }
+    &.active {
+      @include combinator-colors($color-dark-red, black, black);
+      .button {
+        .icon.active {
+          display: initial;
+        }
+        .icon.inactive {
+          display: none;
+        }
+      }
     }
   }
-  .wires {
-    display: none;
+  &.toggle {
+    .button {
+      height: 2 * $combinator-op-size;
+      border-color: $color-cta;
+      cursor: pointer;
+      user-select: none;
+      color: $color-cta;
+      &:hover {
+        background: $color-op-bg-hover;
+      }
+      &::after {
+        background: $color-cta;
+        content: '';
+        position: absolute;
+        top: $combinator-op-size;
+        left: 0;
+        right: 0;
+        height: $combinator-op-size;
+        transition: top 0.3s ease-in-out;
+      }
+    }
+    &.active {
+      @include combinator-colors($color-dark-red, black, black);
+      .button {
+        &::after {
+          top: 0;
+        }
+      }
+    }
+  }
+  &.arithmetic {
+    @include combinator-colors($color-dark-blue, $color-dark-yellow, $color-light-yellow);
+  }
+  &.decider {
+    @include combinator-colors($color-dark-yellow, $color-dark-green, $color-light-green);
+  }
+  &.display {
+    @include combinator-colors($color-dark-green, black, black);
+    .value {
+      transform: rotate(90deg);
+    }
+  }
+  &.label {
+    white-space: pre-line;
+    &.h1 {
+      font-size: 2em;
+      line-height: 100%;
+    }
+    &.h2 {
+      font-size: 1.5em;
+      line-height: 100%;
+    }
   }
 }

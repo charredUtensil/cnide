@@ -9,22 +9,15 @@ const ui = (function(){
     elem.onclick = onClick;
     return elem;
   }
-  
-  class UiPane {
-    destroy() {}
-  }
 
-  class Editor extends UiPane {
+  class Editor {
     constructor(parentElement) {
-      super();
-      
       this.wrapperElement =
         utils.createHtmlElement(parentElement, 'div', ['editor-wrapper', 'editing'])
       const menu = utils.createHtmlElement(this.wrapperElement, 'div', ['menu']);
       
       const edit = utils.createHtmlElement(menu, 'div', ['edit', 'mode']);
       createButton_(edit, 'Run', 'play', () => this.compileAndRun());
-      createButton_(edit, 'Export', 'book', () => this.compileAndExport());
       const gitHub = createButton_(edit, 'GitHub', 'github', () => this.autosave())
       gitHub.href='https://github.com/charredutensil/cnide';
       gitHub.target='blank';
@@ -36,9 +29,6 @@ const ui = (function(){
       createButton_(run, 'Step', 'step-forward', () => this.compiled.step());
       createButton_(run, 'Slow', 'play', () => this.compiled.run(500));
       createButton_(run, 'Fast', 'forward', () => this.compiled.run(1000/60));
-      
-      const xport = utils.createHtmlElement(menu, 'div', ['export', 'mode']);
-      createButton_(xport, 'Edit', 'code', () => this.returnToEditMode());
       
       const editorElement = utils.createHtmlElement(
           this.wrapperElement, 'div', ['editor', 'edit', 'mode']);
@@ -81,24 +71,9 @@ const ui = (function(){
         this.wrapperElement.classList.add('running');
       }, 1);
     }
-    
-    compileAndExport() {
-      if (this.compiled) { return; }
-      const network = this.compile_();
-      if (!network) { return; }
-      const blueprint = new blueprints.Blueprint();
-      blueprint.parseNetwork(network);
-      this.compiled = new Export(blueprint, this.wrapperElement);
-      window.setTimeout(() => {
-        this.wrapperElement.classList.remove('editing');
-        this.wrapperElement.classList.add('exporting');
-      }, 1);
-    }
-    
     returnToEditMode() {
       if (!this.compiled) { return; }
       this.compiled.destroy();
-      this.wrapperElement.classList.remove('exporting');
       this.wrapperElement.classList.remove('running');
       this.wrapperElement.classList.add('editing');
       this.textarea.disabled = false;
@@ -127,10 +102,8 @@ const ui = (function(){
     }
   }
   
-  class Emulator extends UiPane {
+  class Emulator {
     constructor(network, parentElement) {
-      super();
-      
       this.interval = 0;
       this.network = network;
       const element = this.network.getDomElement(parentElement);
@@ -162,21 +135,6 @@ const ui = (function(){
     destroy() {
       this.pause();
       window.setTimeout(() => this.network.getDomElement(null).remove(), 400);
-    }
-  }
-  
-  class Export extends UiPane {
-    constructor(blueprint, parentElement) {
-      super();
-      
-      this.blueprint = blueprint;
-      const element = this.blueprint.getDomElement(parentElement);
-      element.classList.add('export');
-      element.classList.add('mode');
-    }
-    
-    destroy() {
-      window.setTimeout(() => this.blueprint.getDomElement(null).remove(), 400);
     }
   }
   

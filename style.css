@@ -63,8 +63,6 @@ body {
     color: #fff; }
   .menu .run .btn {
     color: #e69100; }
-  .menu .export .btn {
-    color: #fff; }
 
 /* Editor */
 .editor-wrapper {
@@ -89,7 +87,7 @@ body {
       padding: 2px 10px;
       box-sizing: border-box;
       background: transparent;
-      color: #FFF;
+      color: #fff;
       border: none;
       font-family: 'Overpass Mono', monospace;
       font-size: 14px;
@@ -103,10 +101,6 @@ body {
     background: #222; }
     .editor-wrapper.running .menu {
       background: #333; }
-  .editor-wrapper.exporting {
-    background: #283680; }
-    .editor-wrapper.exporting .menu {
-      background: #66c; }
   body.fatal .editor-wrapper .menu {
     background-color: red; }
     body.fatal .editor-wrapper .menu .mode {
@@ -127,14 +121,13 @@ body {
     left: -100%;
     opacity: 0;
     transition: left 0.3s ease-in, opacity 0.3s ease-in; }
-  .mode.run, .mode.export {
+  .mode.run {
     left: 100%;
     opacity: 0;
     transition: left 0.3s ease-in, opacity 0.3s ease-in; }
 
 .editing .mode.edit,
-.running .mode.run,
-.exporting .mode.export {
+.running .mode.run {
   left: 0;
   opacity: initial;
   transition: left 0.3s ease-out, opacity 0.3s ease-out; }
@@ -149,7 +142,7 @@ body {
   box-sizing: border-box;
   background: rgba(255, 0, 0, 0.8); }
 
-/* Combinators & Signals (common) */
+/* Signals (common) */
 .value {
   color: #fff; }
 
@@ -162,90 +155,70 @@ body {
   .signal.each {
     color: #ff3; }
 
-.operator {
-  font-weight: bold; }
-  .arithmetic .operator {
-    color: #ff3; }
-  .decider .operator {
+/* State Table */
+.state {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  font-size: 12px; }
+  .state .wire.red .name {
+    color: #f55; }
+  .state .wire.green .name {
     color: #3e3; }
-
-.combinator {
-  background: #F00; }
-  .combinator.constant {
-    background: #610704; }
-  .combinator.arithmetic {
-    background: #223c55; }
-  .combinator.decider {
-    background: #443d22; }
-  .combinator.display {
-    background: #252; }
+  .state .wire table {
+    width: 100%;
+    border-spacing: 0;
+    font-size: 10px;
+    line-height: normal; }
+    .state .wire table tr:nth-child(even) {
+      background: #333; }
+    .state .wire table .signal {
+      text-align: left;
+      padding-left: 5px; }
+      @media screen and (max-width: 520px) {
+        .state .wire table .signal {
+          padding-left: 20px; } }
+    .state .wire table .value {
+      text-align: right;
+      padding-right: 5px; }
+      @media screen and (max-width: 520px) {
+        .state .wire table .value {
+          padding-right: 20px; } }
 
 /* Network */
 .network-wrapper {
   top: 48px;
   bottom: 0;
-  left: 0;
-  /* Network Elements*/ }
-  .network-wrapper .debug-wrapper {
-    position: relative;
-    overflow: hidden; }
-    .network-wrapper .debug-wrapper::before {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 10px;
-      background: linear-gradient(to bottom, #333 0%, transparent 100%); }
-    .network-wrapper .debug-wrapper::after {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 10px;
-      bottom: 0;
-      background: linear-gradient(to top, #333 0%, transparent 100%); }
-  .network-wrapper > .debug-wrapper {
+  left: 0; }
+  .network-wrapper .state-wrapper {
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     width: 220px;
-    background: #444; }
+    background: #444;
+    overflow: hidden; }
     @media screen and (max-width: 520px) {
-      .network-wrapper > .debug-wrapper {
+      .network-wrapper .state-wrapper {
         left: 0;
         bottom: initial;
         width: 100%;
         height: 100px; } }
-    .network-wrapper > .debug-wrapper::before {
-      background: linear-gradient(to bottom, #444 0%, transparent 100%); }
-    .network-wrapper > .debug-wrapper::after {
-      background: linear-gradient(to top, #444 0%, transparent 100%); }
-    .network-wrapper > .debug-wrapper > .debug > table > tr:nth-child(odd) {
-      background: #333; }
-  .network-wrapper .debug {
-    overflow-x: hidden;
-    overflow-y: scroll;
-    height: 100%;
-    padding: 10px 0;
-    box-sizing: border-box; }
-    .network-wrapper .debug .tick {
-      padding: 0px 10px 10px 10px; }
-    .network-wrapper .debug table {
+    .network-wrapper .state-wrapper::before {
+      content: "";
+      position: absolute;
       width: 100%;
-      border-spacing: 0;
-      font-size: 10px;
-      line-height: normal; }
-    .network-wrapper .debug th {
-      text-align: left;
-      padding-left: 5px; }
-      @media screen and (max-width: 520px) {
-        .network-wrapper .debug th {
-          padding-left: 20px; } }
-    .network-wrapper .debug .value {
-      text-align: right;
-      padding-right: 5px; }
-      @media screen and (max-width: 520px) {
-        .network-wrapper .debug .value {
-          padding-right: 20px; } }
+      height: 10px;
+      background: linear-gradient(to bottom, #444 0%, transparent 100%); }
+    .network-wrapper .state-wrapper::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 10px;
+      bottom: 0;
+      background: linear-gradient(to top, #444 0%, transparent 100%); }
   .network-wrapper .network {
     margin-right: 220px;
     padding: 10px 5px;
@@ -260,189 +233,148 @@ body {
       .network-wrapper .network {
         margin-right: 0px;
         top: 100px; } }
-  .network-wrapper .networked {
-    margin: 28px 0;
-    position: relative; }
-    @media screen and (min-width: 800px) {
-      .network-wrapper .networked {
-        margin: 0 100px 2px; } }
-    .network-wrapper .networked.subnetwork {
-      margin: 0 0 10px;
-      padding: 0 0 10px;
-      background: #333;
-      color: #ccc;
-      border-radius: 20px; }
-      .network-wrapper .networked.subnetwork > .header {
-        padding: 10px;
-        margin-bottom: -10px; }
-        .network-wrapper .networked.subnetwork > .header > .btn {
-          position: absolute;
-          right: 10px;
-          color: #e69100;
-          transition: opacity 0.3s ease-in; }
-    .network-wrapper .networked:not(.collapsed) > .header > .btn.uncollapse {
-      opacity: 0; }
-    .network-wrapper .networked > .debug-wrapper {
-      height: 120px;
-      background: #333;
-      transition: height 0.3s ease-out, opacity 0.3s ease-out; }
-      .network-wrapper .networked > .debug-wrapper > .debug > table > tr:nth-child(odd) {
-        background: #444; }
-    .network-wrapper .networked.collapsed > .debug-wrapper {
-      height: 0;
-      opacity: 0;
-      transition: height 0.3s ease-in, opacity 0.3s ease-in; }
-    .network-wrapper .networked > .children {
-      position: relative;
-      padding: 20px 0;
-      overflow: hidden;
-      transition: opacity 0.3s ease-out, max-height 0.3s ease-in-out, padding 0.3s ease-in-out; }
-      .network-wrapper .networked > .children > .bg {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #222;
-        border-radius: 20px; }
-    .network-wrapper .networked.collapsed > .children {
-      opacity: 0;
-      max-height: 0;
-      padding: 0;
-      transition: opacity 0.3s ease-in, max-height 0.3s ease-in-out, padding 0.3s ease-in-out; }
-    .network-wrapper .networked.label {
-      width: 100%;
-      white-space: pre-line; }
-      @media screen and (min-width: 800px) {
-        .network-wrapper .networked.label {
-          margin: 10px 0; } }
-      .network-wrapper .networked.label.h1 {
-        font-size: 2em;
-        line-height: 100%; }
-      .network-wrapper .networked.label.h2 {
-        font-size: 1.5em;
-        line-height: 100%; }
-  .network-wrapper .wires {
-    font-size: 8px;
-    line-height: 100%;
-    position: absolute; }
-    .network-wrapper .wires > li {
-      list-style-type: none; }
-    .network-wrapper .wires.input {
-      text-align: right;
-      bottom: 100%;
+    .network-wrapper .network .segments {
+      position: absolute;
+      top: 0;
       left: 0;
-      margin-right: 2em; }
-      @media screen and (min-width: 800px) {
-        .network-wrapper .wires.input {
-          bottom: initial;
-          left: initial;
-          top: 0;
-          right: 100%; } }
-      .network-wrapper .wires.input > li:after {
-        content: "->";
-        position: absolute;
-        right: -2em; }
-    .network-wrapper .wires.output {
-      top: 100%;
+      bottom: 0;
       right: 0;
-      margin-left: 2em; }
-      @media screen and (min-width: 800px) {
-        .network-wrapper .wires.output {
-          top: initial;
-          right: initial;
-          bottom: 0;
-          left: 100%; } }
-      .network-wrapper .wires.output > li:before {
-        content: "->";
-        position: absolute;
-        left: -2em; }
-  .network-wrapper .combinator {
-    border-radius: 5px;
-    padding: 2px 10px; }
-    .network-wrapper .combinator.constant .values {
-      border-spacing: 0;
-      width: 100%; }
-      .network-wrapper .combinator.constant .values .value {
-        text-align: right; }
-    .network-wrapper .combinator.constant.button {
-      background: #333;
-      padding: 4px 8px;
-      border: 2px dotted #e69100;
-      min-height: 2em;
-      cursor: pointer;
-      user-select: none; }
-      .network-wrapper .combinator.constant.button .values {
-        padding-left: 40px; }
-      .network-wrapper .combinator.constant.button .icon {
-        position: absolute;
-        top: 5px;
-        left: 10px;
-        font-size: 30px;
-        line-height: 100%;
-        color: #e69100; }
-      .network-wrapper .combinator.constant.button.active {
-        background: #610704;
-        border: 2px solid #e69100; }
-        .network-wrapper .combinator.constant.button.active .icon.inactive {
-          display: none; }
-      .network-wrapper .combinator.constant.button:not(.active):hover {
-        background: #444; }
-      .network-wrapper .combinator.constant.button:not(.active) .signal {
-        color: #579; }
-      .network-wrapper .combinator.constant.button:not(.active) .value {
-        color: #777; }
-      .network-wrapper .combinator.constant.button:not(.active) .icon.active {
-        display: none; }
-    .network-wrapper .combinator.display {
-      line-height: normal;
-      text-align: right; }
-      .network-wrapper .combinator.display .signal {
-        float: left; }
-      .network-wrapper .combinator.display .value {
-        font-size: 24px; }
+      pointer-events: none; }
+      .network-wrapper .network .segments.underlay {
+        z-index: 1; }
+      .network-wrapper .network .segments.overlay {
+        z-index: 3; }
 
-/* Blueprint */
-.blueprint-wrapper {
-  top: 48px;
-  bottom: 0;
-  left: 0;
-  overflow-x: hidden;
-  overflow-y: scroll; }
-  .blueprint-wrapper .blueprint-grid {
-    width: 100%; }
-    .blueprint-wrapper .blueprint-grid .row {
-      height: 96px; }
-  .blueprint-wrapper .blueprint-overlay {
+/* Combinators */
+.combinator {
+  box-sizing: border-box;
+  overflow: hidden; }
+  .combinator .operator {
+    font-weight: bold; }
+  .combinator.thumbnail {
     position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0; }
-  .blueprint-wrapper .networked {
-    box-sizing: border-box;
-    overflow: hidden;
-    display: inline-block;
-    padding: 5px;
     width: 20%;
-    height: 100%; }
-  .blueprint-wrapper .combinator {
-    width: 100%;
-    height: 100%;
-    padding: 2px;
-    font-size: 6px; }
-    @media screen and (max-width: 520px) {
-      .blueprint-wrapper .combinator > * {
-        display: none; }
-      .blueprint-wrapper .combinator .operator {
-        display: block;
-        margin: auto;
-        height: 24px;
-        width: 24px;
-        font-size: 24px;
-        line-height: 86px;
-        text-align: center; } }
-  .blueprint-wrapper .wires {
+    height: 96px;
+    z-index: 2; }
+    .combinator.thumbnail .operator, .combinator.thumbnail .button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+      text-align: center;
+      background: #333;
+      height: 30px;
+      width: 30px;
+      line-height: 30px;
+      border-radius: 5px;
+      border: 2px solid white; }
+    .combinator.thumbnail::before {
+      content: '';
+      border-radius: 5px;
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 15px;
+      right: 15px; }
+  .combinator.detail {
+    display: none;
+    z-index: 4; }
+  .combinator.constant.thumbnail::before {
+    background: #610704; }
+  .combinator.constant.thumbnail .operator {
+    border-color: black;
+    color: black; }
+  .combinator.constant.detail {
+    background: #610704; }
+    .combinator.constant.detail .operator {
+      color: black; }
+  .combinator.pulse .button {
+    border-color: #e69100;
+    cursor: pointer;
+    user-select: none;
+    color: #e69100; }
+    .combinator.pulse .button:hover {
+      background: #444; }
+    .combinator.pulse .button .icon.active {
+      display: none; }
+  .combinator.pulse.active.thumbnail::before {
+    background: #610704; }
+  .combinator.pulse.active.thumbnail .operator {
+    border-color: black;
+    color: black; }
+  .combinator.pulse.active.detail {
+    background: #610704; }
+    .combinator.pulse.active.detail .operator {
+      color: black; }
+  .combinator.pulse.active .button .icon.active {
+    display: initial; }
+  .combinator.pulse.active .button .icon.inactive {
     display: none; }
+  .combinator.toggle .button {
+    height: 60px;
+    border-color: #e69100;
+    cursor: pointer;
+    user-select: none;
+    color: #e69100; }
+    .combinator.toggle .button:hover {
+      background: #444; }
+    .combinator.toggle .button::after {
+      background: #e69100;
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 0;
+      right: 0;
+      height: 30px;
+      transition: top 0.3s ease-in-out; }
+  .combinator.toggle.active.thumbnail::before {
+    background: #610704; }
+  .combinator.toggle.active.thumbnail .operator {
+    border-color: black;
+    color: black; }
+  .combinator.toggle.active.detail {
+    background: #610704; }
+    .combinator.toggle.active.detail .operator {
+      color: black; }
+  .combinator.toggle.active .button::after {
+    top: 0; }
+  .combinator.arithmetic.thumbnail::before {
+    background: #223c55; }
+  .combinator.arithmetic.thumbnail .operator {
+    border-color: #443d22;
+    color: #443d22; }
+  .combinator.arithmetic.detail {
+    background: #223c55; }
+    .combinator.arithmetic.detail .operator {
+      color: #ff3; }
+  .combinator.decider.thumbnail::before {
+    background: #443d22; }
+  .combinator.decider.thumbnail .operator {
+    border-color: #252;
+    color: #252; }
+  .combinator.decider.detail {
+    background: #443d22; }
+    .combinator.decider.detail .operator {
+      color: #3e3; }
+  .combinator.display.thumbnail::before {
+    background: #252; }
+  .combinator.display.thumbnail .operator {
+    border-color: black;
+    color: black; }
+  .combinator.display.detail {
+    background: #252; }
+    .combinator.display.detail .operator {
+      color: black; }
+  .combinator.display .value {
+    transform: rotate(90deg); }
+  .combinator.label {
+    white-space: pre-line; }
+    .combinator.label.h1 {
+      font-size: 2em;
+      line-height: 100%; }
+    .combinator.label.h2 {
+      font-size: 1.5em;
+      line-height: 100%; }
 
 /*# sourceMappingURL=style.css.map */

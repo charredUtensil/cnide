@@ -28,6 +28,8 @@ const utils = (function(){
     return (negate ? '-' : '') + Math.floor(v) + ['', 'K', 'M', 'G'][suffixIndex]
   }
   
+  class NotImplementedError extends Error {}
+  
   class Renderable {
     getDomElement(parent) {
       if (!this.element) {
@@ -45,8 +47,16 @@ const utils = (function(){
   return utils;
 })();
 
-window.onerror = function(msg) {
+window.onerror = function(msg, src, line, col, error) {
   document.body.classList.add('fatal');
+  try {
+    src = src.substring(src.indexof('cnide'));
+  } catch (e) {}
+  try {
+    if (src && line) {
+      msg = msg + ' [line ' + line + ', col ' + col + ' of ' + src + ']';
+    }
+  } catch (e) {}
   try {
     utils.createHtmlElement(
         document.body, 'div', ['fatal-error-message'], msg);

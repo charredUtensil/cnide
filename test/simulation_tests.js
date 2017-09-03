@@ -110,7 +110,7 @@
       IN -> a / 2 as b -> INTERNAL
       INTERNAL -> b * 4 as c -> OUT
     }`,
-    3, { 'ALPHA': {'a': 42}, 'OMEGA': {'c': 84} });
+    3, { 'ALPHA': {'a': 42}, 'OMEGA': {'c': 84}, 'Sub.1.INTERNAL': {'b': 21} });
   TESTS.simulate_subnetwork_oneWire = () => simulateAndAssertTests(
     `Main() {
       {a:42} -> ALPHA
