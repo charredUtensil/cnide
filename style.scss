@@ -11,11 +11,25 @@
   }
 }
 
+@mixin material-transition($properties) {
+  transition-property: $properties;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+}
+$material-shadow: 0 0 4px black;
+$material-shadow-selected: 0 1px 7px black;
+
+$font-size-big: 18px;
 $font-size: 14px;
+$font-size-small: 12px;
+$font-size-tiny: 10px;
+
 $menu-height: 48px;
 $combinator-height: 96px;
 $combinator-op-size: 30px;
 $combinator-op-font-size: 20px;
+$combinator-inset-x: 15px;
+$combinator-inset-y: 5px;
 
 $color-edit: #fff;
 $color-edit-bg: #123;
@@ -42,7 +56,9 @@ $color-cta: $color-run-menu;
 $z-underlay: 1;
 $z-thumbnail: 2;
 $z-overlay: 3;
-$z-detail: 4;
+$z-statepane: 4;
+$z-detail: 5;
+$z-menu: 6;
 
 
 /* Generics and Reset */
@@ -77,8 +93,8 @@ body {
   height: $menu-height;
   overflow: hidden;
   white-space: pre;
-  z-index: 1;
-  box-shadow: 0 0px 4px black;
+  z-index: $z-menu;
+  box-shadow: $material-shadow;
   transition: background 0.3s ease-in-out;
   .btn {
     display: inline-block;
@@ -251,37 +267,34 @@ body {
   height: 100%;
   padding: 10px 0;
   box-sizing: border-box;
-  font-size: 12px;
-  .wire {
-    &.red .name {
-      color: $color-light-red;
+  font-size: $font-size-small;
+  .name, .signal {
+    padding-left: 5px;
+    @include small {
+      padding-left: 20px;
     }
-    &.green .name {
-      color: $color-light-green;
+  }
+  .tick, .value {
+    text-align: right;
+    padding-right: 5px;
+    @include small {
+      padding-right: 20px;
     }
-    table {
-      width: 100%;
-      border-spacing: 0;
-      font-size: 10px;
-      line-height: normal;
-      tr:nth-child(even) {
-        background: #333;
-      }
-      .signal {
-        text-align: left;
-        padding-left: 5px;
-        @include small {
-          padding-left: 20px;
-        }
-      }
-      .value {
-        text-align: right;
-        padding-right: 5px;
-        @include small {
-          padding-right: 20px;
-        }
-      }
-    }
+  }
+  .tick, .wire {
+    border-bottom: 1px solid #333;
+  }
+  .signal-table {
+    width: 100%;
+  }
+}
+
+.signal-table {
+  border-spacing: 0;
+  font-size: $font-size-tiny;
+  line-height: normal;
+  tr:nth-child(even) {
+    background: #3c3c3c;
   }
 }
 
@@ -298,12 +311,13 @@ body {
     bottom: 0;
     width: 220px;
     background: #444;
-    overflow: hidden;
+    z-index: $z-statepane;
     @include small {
       left: 0;
       bottom: initial;
       width: 100%;
       height: 100px;
+      box-shadow: $material-shadow;
     }
     &::before {
       content: "";
@@ -321,9 +335,20 @@ body {
       background: linear-gradient(to top, #444 0%,rgba(0, 0, 0, 0) 100%);
     }
   }
+  .detail-wrapper {
+    display: table;
+    position: absolute;
+    z-index: $z-detail;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: $menu-height;
+    width: 100%;
+    text-align: center;
+    box-shadow: $material-shadow;
+  }
   .network  {
     margin-right: 220px;
-    padding: 10px 5px;
     position: absolute;
     top: 0;
     right: 0;
@@ -398,25 +423,51 @@ body {
       border-radius: 5px;
       border: 2px solid white;
     }  
-		  &::before {
-		    content: '';
-		    border-radius: 5px;
-		    position: absolute;
-		    top: 5px;
-		    bottom: 5px;
-		    left: 15px;
-		    right: 15px;
-		  }
+    &::before {
+      content: '';
+      border-radius: 5px;
+      position: absolute;
+      top: $combinator-inset-y;
+      bottom: $combinator-inset-y;
+      left: $combinator-inset-x;
+      right: $combinator-inset-x;
+    }
+    &.selected {
+      &::before {
+      }
+    }
+    &.constant, &.toggle, &.pulse, &.display {
+      .signal, .value {
+        position: absolute;
+        left: $combinator-inset-x;
+        right: $combinator-inset-x;
+      }
+      .signal {
+        top: $combinator-inset-y;
+        word-wrap: break-word;
+        font-size: $font-size-tiny;
+        line-height: 100%;
+      }
+      .value {
+        bottom: $combinator-inset-y;
+        text-align: right;
+      }
+    }
   }
   &.detail {
     display: none;
-    z-index: $z-detail;
+    vertical-align: middle;
+    &.selected {
+      display: table-cell;
+      min-height: $menu-height;
+    }
   }
   
   &.constant {
     @include combinator-colors($color-dark-red, black, black);
   }
   &.pulse {
+    @include combinator-colors(#444, black, black);
     .button {
       border-color: $color-cta;
       cursor: pointer;
@@ -442,6 +493,7 @@ body {
     }
   }
   &.toggle {
+    @include combinator-colors(#444, black, black);
     .button {
       height: 2 * $combinator-op-size;
       border-color: $color-cta;
@@ -471,6 +523,9 @@ body {
       }
     }
   }
+  &.pole {
+    @include combinator-colors(#444, black, black);
+  }
   &.arithmetic {
     @include combinator-colors($color-dark-blue, $color-dark-yellow, $color-light-yellow);
   }
@@ -479,18 +534,21 @@ body {
   }
   &.display {
     @include combinator-colors($color-dark-green, black, black);
-    .value {
-      transform: rotate(90deg);
+    &.thumbnail .value {
+      @include big {
+        font-size: $font-size-big;
+        line-height: 100%;
+      }
     }
   }
   &.label {
     white-space: pre-line;
     &.h1 {
-      font-size: 2em;
+      font-size: $font-size-big;
       line-height: 100%;
     }
-    &.h2 {
-      font-size: 1.5em;
+    &.h3 {
+      font-size: $font-size-small;
       line-height: 100%;
     }
   }

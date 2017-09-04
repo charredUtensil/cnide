@@ -40,6 +40,16 @@ network.combinators = (function(){
     getOutput(inputs) {
       return this.values;
     }
+    
+    /** @Override */
+    initElements() {
+      const keys = Object.keys(this.values);
+      if (keys.length == 1) {
+        utils.createHtmlElement(this.thumbnail, 'div', ['signal'], keys[0]);
+        utils.createHtmlElement(this.thumbnail, 'div', ['value'],
+                                utils.factorioHumanize(this.values[keys[0]]));
+      }
+    }
   }
   
   /** A constant combinator that is turned on/off by clicking on its switch. */
@@ -72,6 +82,7 @@ network.combinators = (function(){
     
     /** @Override */
     initElements() {
+      super.initElements();
       for (parent of [this.thumbnail, this.detail]) {
         const button = utils.createHtmlElement(parent, 'div', ['button']);
         button.onclick = () => this.setActive_(!this.active);
@@ -368,8 +379,9 @@ network.combinators = (function(){
     
     /** @Override */
     initElements() {
+      utils.createHtmlElement(this.thumbnail, 'div', ['signal'], this.signal);
       this.valueElement = utils.createHtmlElement(
-          this.thumbnail, 'span', ['value'], '' + this.value);
+          this.thumbnail, 'div', ['value'], '' + this.value);
     }
   }
   

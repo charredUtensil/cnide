@@ -1,6 +1,9 @@
 const utils = (function(){
   const utils = {};
   
+  utils.MAX_INT =  2147483647;
+  utils.MIN_INT = -2147483647;
+  
   utils.createHtmlElement = function(parent, tag, classList, text) {
     const element = document.createElement(tag);
     if (classList) {
@@ -18,6 +21,8 @@ const utils = (function(){
   }
   
   utils.factorioHumanize = function(value) {
+    if (value >= utils.MAX_INT) { return 'MAX'; }
+    if (value <= utils.MIN_INT) { return '-MAX'; }
     const negate = value < 0;
     let v = negate ? -value : value;
     let suffixIndex = 0;
@@ -27,8 +32,6 @@ const utils = (function(){
     }
     return (negate ? '-' : '') + Math.floor(v) + ['', 'K', 'M', 'G'][suffixIndex]
   }
-  
-  class NotImplementedError extends Error {}
   
   class Renderable {
     getDomElement(parent) {

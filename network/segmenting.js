@@ -31,6 +31,9 @@ network.segmenting = (function(){
     }
     
     getColorAttr(active) {
+      if (!active) {
+        return '#444';
+      }
       return SVG_COLORS[this.color];
     }
   }
@@ -206,12 +209,14 @@ network.segmenting = (function(){
       }
       for (let i = 0; i < this.positions_.length; i++) {
         const combinator = this.positions_[i];
-        combinator.xPos = i % CLIQUE_SIZE;
+        combinator.xPos =
+            Math.floor(i / CLIQUE_SIZE) % 2 == 0 ?
+            i % CLIQUE_SIZE :
+            CLIQUE_SIZE - (i % CLIQUE_SIZE) - 1;
         combinator.yPos = Math.floor(i / CLIQUE_SIZE) * 2;
         let needPole = false;
         for (const conn of getConnections_(combinator)) {
-          wires[conn.wire].shift();
-          const nextConnection = wires[conn.wire][0];
+          const nextConnection = wires[conn.wire][1];
           if (!nextConnection) { continue; }
           if (this.hDistance_(i, conn, nextConnection) > CLIQUE_SIZE) {
             // The next combinator may be too far to connect, so add a pole.
@@ -228,7 +233,8 @@ network.segmenting = (function(){
           // there are no gaps in coverage, so the next combinator (that the current one can't
           // reach) is within or past this pole's range.
           const poleIndex = i + CLIQUE_SIZE *
-              (combinator instanceof network.combinators.Pole ? POLE_DISTANCE : CLIQUE_SIZE);
+              Math.floor((combinator instanceof network.combinators.Pole ?
+                          POLE_DISTANCE : CLIQUE_SIZE) / 2);
           for (let j = this.positions_.length; j < poleIndex; j++) {
             this.positions_[j] = new network.combinators.Label('');
           }
@@ -239,8 +245,8 @@ network.segmenting = (function(){
             this.wireSegments.push(new WireSegment(colors[conn.wire], conn, poleConn));
             // Next insert the pole connections into all the wire queues at
             // their correct positions.
-            let indexInQueue = 0;
-            if (wires[conn.wire][0]) {
+            let indexInQueue = 1;
+            if (wires[conn.wire][1]) {
               for (let j = i; j < this.poleIndex; j++) {
                 if (this.positions_[j] == wires[conn.wire][indexInQueue]) {
                   indexInQueue++;
@@ -251,6 +257,7 @@ network.segmenting = (function(){
           }
         }
         for (const conn of getConnections_(combinator)) {
+          wires[conn.wire].shift();
           const nextConnection = wires[conn.wire][0];
           if (!nextConnection) { continue; }
           if (this.hDistance_(i, conn, nextConnection) <= CLIQUE_SIZE) {
@@ -259,21 +266,6 @@ network.segmenting = (function(){
           }
         }     
       }
-    }
-    
-    initElement(root) {
-      root.classList.add('segment-wrapper');
-      this.grid = utils.createHtmlElement(root, 'div', ['blueprint-grid']);
-      let tr = null;
-      for (let i = 0; i < this.positions_.length; i++) {
-        if (i % CLIQUE_SIZE == 0) {
-          tr = utils.createHtmlElement(this.grid, 'div', ['row']);
-        }
-        this.positions_[i].getDomElement(tr);
-      }
-      this.onresize_ = () => this.updateSvg_(root);
-      window.addEventListener('resize', this.onresize_);
-      this.updateSvg_(root);
     }
   }
    

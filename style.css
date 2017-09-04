@@ -26,8 +26,8 @@ body {
   height: 48px;
   overflow: hidden;
   white-space: pre;
-  z-index: 1;
-  box-shadow: 0 0px 4px black;
+  z-index: 6;
+  box-shadow: 0 0 4px black;
   transition: background 0.3s ease-in-out; }
   .menu .btn {
     display: inline-block;
@@ -163,29 +163,28 @@ body {
   padding: 10px 0;
   box-sizing: border-box;
   font-size: 12px; }
-  .state .wire.red .name {
-    color: #f55; }
-  .state .wire.green .name {
-    color: #3e3; }
-  .state .wire table {
-    width: 100%;
-    border-spacing: 0;
-    font-size: 10px;
-    line-height: normal; }
-    .state .wire table tr:nth-child(even) {
-      background: #333; }
-    .state .wire table .signal {
-      text-align: left;
-      padding-left: 5px; }
-      @media screen and (max-width: 520px) {
-        .state .wire table .signal {
-          padding-left: 20px; } }
-    .state .wire table .value {
-      text-align: right;
-      padding-right: 5px; }
-      @media screen and (max-width: 520px) {
-        .state .wire table .value {
-          padding-right: 20px; } }
+  .state .name, .state .signal {
+    padding-left: 5px; }
+    @media screen and (max-width: 520px) {
+      .state .name, .state .signal {
+        padding-left: 20px; } }
+  .state .tick, .state .value {
+    text-align: right;
+    padding-right: 5px; }
+    @media screen and (max-width: 520px) {
+      .state .tick, .state .value {
+        padding-right: 20px; } }
+  .state .tick, .state .wire {
+    border-bottom: 1px solid #333; }
+  .state .signal-table {
+    width: 100%; }
+
+.signal-table {
+  border-spacing: 0;
+  font-size: 10px;
+  line-height: normal; }
+  .signal-table tr:nth-child(even) {
+    background: #3c3c3c; }
 
 /* Network */
 .network-wrapper {
@@ -199,13 +198,14 @@ body {
     bottom: 0;
     width: 220px;
     background: #444;
-    overflow: hidden; }
+    z-index: 4; }
     @media screen and (max-width: 520px) {
       .network-wrapper .state-wrapper {
         left: 0;
         bottom: initial;
         width: 100%;
-        height: 100px; } }
+        height: 100px;
+        box-shadow: 0 0 4px black; } }
     .network-wrapper .state-wrapper::before {
       content: "";
       position: absolute;
@@ -219,9 +219,19 @@ body {
       height: 10px;
       bottom: 0;
       background: linear-gradient(to top, #444 0%, transparent 100%); }
+  .network-wrapper .detail-wrapper {
+    display: table;
+    position: absolute;
+    z-index: 5;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 4px black; }
   .network-wrapper .network {
     margin-right: 220px;
-    padding: 10px 5px;
     position: absolute;
     top: 0;
     right: 0;
@@ -277,9 +287,24 @@ body {
       bottom: 5px;
       left: 15px;
       right: 15px; }
+    .combinator.thumbnail.constant .signal, .combinator.thumbnail.constant .value, .combinator.thumbnail.toggle .signal, .combinator.thumbnail.toggle .value, .combinator.thumbnail.pulse .signal, .combinator.thumbnail.pulse .value, .combinator.thumbnail.display .signal, .combinator.thumbnail.display .value {
+      position: absolute;
+      left: 15px;
+      right: 15px; }
+    .combinator.thumbnail.constant .signal, .combinator.thumbnail.toggle .signal, .combinator.thumbnail.pulse .signal, .combinator.thumbnail.display .signal {
+      top: 5px;
+      word-wrap: break-word;
+      font-size: 10px;
+      line-height: 100%; }
+    .combinator.thumbnail.constant .value, .combinator.thumbnail.toggle .value, .combinator.thumbnail.pulse .value, .combinator.thumbnail.display .value {
+      bottom: 5px;
+      text-align: right; }
   .combinator.detail {
     display: none;
-    z-index: 4; }
+    vertical-align: middle; }
+    .combinator.detail.selected {
+      display: table-cell;
+      min-height: 48px; }
   .combinator.constant.thumbnail::before {
     background: #610704; }
   .combinator.constant.thumbnail .operator {
@@ -288,6 +313,15 @@ body {
   .combinator.constant.detail {
     background: #610704; }
     .combinator.constant.detail .operator {
+      color: black; }
+  .combinator.pulse.thumbnail::before {
+    background: #444; }
+  .combinator.pulse.thumbnail .operator {
+    border-color: black;
+    color: black; }
+  .combinator.pulse.detail {
+    background: #444; }
+    .combinator.pulse.detail .operator {
       color: black; }
   .combinator.pulse .button {
     border-color: #e69100;
@@ -311,6 +345,15 @@ body {
     display: initial; }
   .combinator.pulse.active .button .icon.inactive {
     display: none; }
+  .combinator.toggle.thumbnail::before {
+    background: #444; }
+  .combinator.toggle.thumbnail .operator {
+    border-color: black;
+    color: black; }
+  .combinator.toggle.detail {
+    background: #444; }
+    .combinator.toggle.detail .operator {
+      color: black; }
   .combinator.toggle .button {
     height: 60px;
     border-color: #e69100;
@@ -339,6 +382,15 @@ body {
       color: black; }
   .combinator.toggle.active .button::after {
     top: 0; }
+  .combinator.pole.thumbnail::before {
+    background: #444; }
+  .combinator.pole.thumbnail .operator {
+    border-color: black;
+    color: black; }
+  .combinator.pole.detail {
+    background: #444; }
+    .combinator.pole.detail .operator {
+      color: black; }
   .combinator.arithmetic.thumbnail::before {
     background: #223c55; }
   .combinator.arithmetic.thumbnail .operator {
@@ -366,15 +418,17 @@ body {
     background: #252; }
     .combinator.display.detail .operator {
       color: black; }
-  .combinator.display .value {
-    transform: rotate(90deg); }
+  @media screen and (min-width: 800px) {
+    .combinator.display.thumbnail .value {
+      font-size: 18px;
+      line-height: 100%; } }
   .combinator.label {
     white-space: pre-line; }
     .combinator.label.h1 {
-      font-size: 2em;
+      font-size: 18px;
       line-height: 100%; }
-    .combinator.label.h2 {
-      font-size: 1.5em;
+    .combinator.label.h3 {
+      font-size: 12px;
       line-height: 100%; }
 
 /*# sourceMappingURL=style.css.map */
