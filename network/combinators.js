@@ -49,6 +49,12 @@ network.combinators = (function(){
         utils.createHtmlElement(this.thumbnail, 'div', ['value'],
                                 utils.factorioHumanize(this.values[keys[0]]));
       }
+      const table = utils.createHtmlElement(this.detail, 'table', ['signal-table']);
+      for (const k of keys) {
+        const tr = utils.createHtmlElement(table, 'tr', []);
+        utils.createHtmlElement(tr, 'td', ['signal'], k);
+        utils.createHtmlElement(tr, 'td', ['value'], this.values[k]);
+      }
     }
   }
   
@@ -361,14 +367,16 @@ network.combinators = (function(){
       super(inputs, []);
       this.signal = signal;
       this.value = 0;
-      this.valueElement = null;
     }
     
     /** @Override */
     getOutput(input) {
       this.value = input[this.signal] || 0;
-      if (this.valueElement) {
-        this.valueElement.innerHTML = utils.factorioHumanize(this.value);
+      if (this.valueElementThumb) {
+        this.valueElementThumb.innerHTML = utils.factorioHumanize(this.value);
+      }
+      if (this.valueElementDetail) {
+        this.valueElementDetail.innerHTML = '' + this.value;
       }
     }
     
@@ -380,8 +388,12 @@ network.combinators = (function(){
     /** @Override */
     initElements() {
       utils.createHtmlElement(this.thumbnail, 'div', ['signal'], this.signal);
-      this.valueElement = utils.createHtmlElement(
+      
+      this.valueElementThumb = utils.createHtmlElement(
           this.thumbnail, 'div', ['value'], '' + this.value);
+      utils.createHtmlElement(this.detail, 'span', ['signal'], this.signal);
+      this.valueElementDetail = utils.createHtmlElement(
+          this.detail, 'span', ['value'], '' + this.value);
     }
   }
   

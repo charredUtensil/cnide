@@ -45,8 +45,8 @@ const ui = (function(){
     compile_() {
       this.autosave();
       try {
-		      const network = parser.parse(this.textarea.value);
-		      return network;
+		      const cn = parser.parse(this.textarea.value);
+		      return cn;
       } catch (e) {
         if (e instanceof parser.SyntaxError) {
           alert('Syntax Error on line ' + e.location.start.line + ':\n' + e.message);

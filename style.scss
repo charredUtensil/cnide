@@ -275,7 +275,6 @@ body {
     }
   }
   .tick, .value {
-    text-align: right;
     padding-right: 5px;
     @include small {
       padding-right: 20px;
@@ -283,7 +282,7 @@ body {
   }
   .tick, .wire {
     border-bottom: 1px solid #333;
-  }
+  }  
   .signal-table {
     width: 100%;
   }
@@ -294,7 +293,13 @@ body {
   font-size: $font-size-tiny;
   line-height: normal;
   tr:nth-child(even) {
-    background: #3c3c3c;
+    background: rgba(0, 0, 0, 0.16);
+  }
+  .signal {
+    float: left;
+  }
+  .value {
+    text-align: right;
   }
 }
 
@@ -308,7 +313,7 @@ body {
     position: absolute;
     top: 0;
     right: 0;
-    bottom: 0;
+    bottom: $menu-height;
     width: 220px;
     background: #444;
     z-index: $z-statepane;
@@ -346,13 +351,14 @@ body {
     width: 100%;
     text-align: center;
     box-shadow: $material-shadow;
+    background: $color-run-menu-bg
   }
   .network  {
     margin-right: 220px;
     position: absolute;
     top: 0;
     right: 0;
-    bottom: 0;
+    bottom: $menu-height;
     left: 0;
     overflow-x: hidden;
     overflow-y: scroll;
@@ -396,6 +402,18 @@ body {
   }
 }
 
+@keyframes pulse-selected {
+  0% {
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 4px white;
+  }
+  100% {
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+  }
+}
+
 .combinator {
   box-sizing: border-box;
   overflow: hidden;
@@ -403,6 +421,23 @@ body {
   .operator {
     font-weight: bold;
   }
+  
+  .button {
+    font-size: $combinator-op-font-size;
+    text-align: center;
+    background: $color-op-bg;
+    height: $combinator-op-size;
+    width: $combinator-op-size;
+    line-height: $combinator-op-size;
+    border-radius: 5px;
+    border: 2px solid $color-cta;
+    cursor: pointer;
+    user-select: none;
+    color: $color-cta;
+    &:hover {
+      background: $color-op-bg-hover;
+    }
+  }  
 
   &.thumbnail {
     position: absolute;
@@ -414,6 +449,8 @@ body {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+    }
+    .operator {
       font-size: $combinator-op-font-size;
       text-align: center;
       background: $color-op-bg;
@@ -432,9 +469,9 @@ body {
       left: $combinator-inset-x;
       right: $combinator-inset-x;
     }
-    &.selected {
-      &::before {
-      }
+    &.selected::before {
+      box-shadow: 0 0 4px white;
+      animation: 5s pulse-selected infinite;
     }
     &.constant, &.toggle, &.pulse, &.display {
       .signal, .value {
@@ -461,6 +498,18 @@ body {
       display: table-cell;
       min-height: $menu-height;
     }
+    .signal-table {
+      margin: 0 auto;
+      .signal {
+        padding-right: 20px;
+      }
+    }
+    .button {
+      position: absolute;
+      left: 20px;
+      top: -20px;
+      box-shadow: 0 0 12px black;
+    }  
   }
   
   &.constant {
@@ -468,17 +517,8 @@ body {
   }
   &.pulse {
     @include combinator-colors(#444, black, black);
-    .button {
-      border-color: $color-cta;
-      cursor: pointer;
-      user-select: none;
-      color: $color-cta;
-      &:hover {
-        background: $color-op-bg-hover;
-      }
-      .icon.active {
-        display: none;
-      }
+    .button .icon.active {
+      display: none;
     }
     &.active {
       @include combinator-colors($color-dark-red, black, black);
@@ -496,13 +536,6 @@ body {
     @include combinator-colors(#444, black, black);
     .button {
       height: 2 * $combinator-op-size;
-      border-color: $color-cta;
-      cursor: pointer;
-      user-select: none;
-      color: $color-cta;
-      &:hover {
-        background: $color-op-bg-hover;
-      }
       &::after {
         background: $color-cta;
         content: '';
@@ -540,9 +573,22 @@ body {
         line-height: 100%;
       }
     }
+    &.detail {
+      .value {
+        font-size: $font-size-big;
+        padding-left: 20px;
+      }
+    }
   }
   &.label {
     white-space: pre-line;
+    &.thumbnail::before {
+      display: none;
+    }
+    &.detail {
+      background: #333;
+      padding: 10px 5px;
+    }
     &.h1 {
       font-size: $font-size-big;
       line-height: 100%;

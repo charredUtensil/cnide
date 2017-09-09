@@ -182,16 +182,10 @@ network.segmenting = (function(){
       this.wireSegments = [];
     }
     
-    /*destroy() {
-      if (this.onresize_) {
-        window.removeEventListener('resize', this.onresize);
-      }
-    }*/
-    
     hDistance_(index, connection, nextConnection) {
       const nextI = this.positions_.indexOf(nextConnection.combinator, index);
-      return (Math.floor(nextI / CLIQUE_SIZE) + nextConnection.hOffset) -
-          (Math.floor(index / CLIQUE_SIZE) + connection.hOffset);
+      return (Math.floor(nextI / CLIQUE_SIZE) * 2 + nextConnection.hOffset) -
+          (Math.floor(index / CLIQUE_SIZE) * 2 + connection.hOffset);
     }
     
     parseNetwork(cn, colors) {
@@ -221,6 +215,7 @@ network.segmenting = (function(){
           if (this.hDistance_(i, conn, nextConnection) > CLIQUE_SIZE) {
             // The next combinator may be too far to connect, so add a pole.
             needPole = true;
+            break;
           } else {
             // Can't connect the combinator yet. It might be bumped by another
             // wire adding a pole.
@@ -246,25 +241,27 @@ network.segmenting = (function(){
             // Next insert the pole connections into all the wire queues at
             // their correct positions.
             let indexInQueue = 1;
-            if (wires[conn.wire][1]) {
-              for (let j = i; j < this.poleIndex; j++) {
-                if (this.positions_[j] == wires[conn.wire][indexInQueue]) {
-                  indexInQueue++;
-                }
+            for (let j = i; j < poleIndex && indexInQueue < wires[conn.wire].length;) {
+              if (this.positions_[j] == wires[conn.wire][indexInQueue].combinator) {
+                indexInQueue++;
+              } else {
+                j++;
               }
             }
             wires[conn.wire].splice(indexInQueue, 0, poleConn);
           }
         }
         for (const conn of getConnections_(combinator)) {
-          wires[conn.wire].shift();
+          if (wires[conn.wire].shift().combinator != combinator) {
+            throw new Error('Array for ' + conn.wire + ' is in the wrong order');
+          }
           const nextConnection = wires[conn.wire][0];
           if (!nextConnection) { continue; }
           if (this.hDistance_(i, conn, nextConnection) <= CLIQUE_SIZE) {
             const ws = new WireSegment(colors[conn.wire], conn, nextConnection);
             this.wireSegments.push(ws);
           }
-        }     
+        }
       }
     }
   }
