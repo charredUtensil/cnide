@@ -328,7 +328,7 @@ network.combinators = (function(){
       let sum = 0;
       for (const k of Object.keys(input)) {
         const condition = this.compare_(input, k, this.right);
-        if (!condition) { break; }
+        if (!condition) { continue; }
         sum += this.asOne ? 1 : input[k];
       }
       const r = {};
@@ -349,7 +349,7 @@ network.combinators = (function(){
       const r = {};
       for (const k of Object.keys(input)) {
         const condition = this.compare_(input, k, this.right);
-        if (!condition) { break; }
+        if (!condition) { continue; }
         r[k] = this.asOne ? 1 : input[k];
       }
       return r;
