@@ -78,16 +78,16 @@
 
   // Overflow / Underflow
   TESTS.simulate_outputOverflow = () => simulateAndAssertTests(
-      'Main(){ {signal: 9999999999999} -> WIRE }', 1,
-      { 'WIRE': { 'signal': 2147483647 } });
+      'Main(){ {signal: 2147483647, signal: 1} -> WIRE }', 1,
+      { 'WIRE': { 'signal': -2147483648 } });
   TESTS.simulate_outputUnderflow = () => simulateAndAssertTests(
-      'Main(){ {signal: -9999999999999} -> WIRE }', 1,
-      { 'WIRE': { 'signal': -2147483647 } });
+      'Main(){ {signal: -2147483648, signal: -1} -> WIRE }', 1,
+      { 'WIRE': { 'signal': 2147483647 } });
   TESTS.simulate_inputOverflow = () => simulateAndAssertTests(
-      'Main(){ {signal: 2000000000} -> (A, B) (A, B) -> signal / 2 as signal -> OUT }', 2,
-      { 'A': { 'signal': 2000000000 },
-        'B': { 'signal': 2000000000 },
-        'OUT': { 'signal': 1073741823 } });
+      'Main(){ {signal: 2147483647} -> (A, B) (A, B) -> signal / 2 as signal -> OUT }', 2,
+      { 'A': { 'signal': 2147483647 },
+        'B': { 'signal': 2147483647 },
+        'OUT': { 'signal': -1 } });
 
   // Sub-networks
   TESTS.simulate_subnetwork_bindsWires = () => simulateAndAssertTests(

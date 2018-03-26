@@ -40,6 +40,9 @@
         '/* comment */->/* comment */W/* comment */'), 1); };
         
   TESTS.parser_notParsesUnsegmentable = () => {
-    assertNotParses(m('(A, B) -> x + 0 as x -> (B, C)\n{x: 1} -> (A, C)'));
-  }
+    assertNotParses(m('(A, B) -> x + 0 as x -> (B, C)\n{x: 1} -> (A, C)')); };
+    
+  TESTS.parser_parsesConstant = () => { assertParses(m('{x: 9999} -> A'), 1); };
+  TESTS.parser_notParsesOverflow = () => {
+    assertNotParses(m('{x: 9999999999} -> A'), 1); };
 })();
