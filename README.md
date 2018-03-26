@@ -11,7 +11,7 @@ The first character must be a letter.
 - `X`
 
 Wires are separated from combinators with an arrow (`->`).
-Inputs come before the combinator. Outputs come before the combinator.
+Inputs come before the combinator. Outputs come after the combinator.
 - `INPUT -> counter + 1 as counter -> OUTPUT`
 
 You may specify a pair of wires (one red, one green) instead.
@@ -163,10 +163,10 @@ This is to be expected, as the same thing will happen in Factorio if all combina
 
     Main() {
       (SET, SR_ON) ->
-        a = 0 then a as 1
+        a = 0 then 1 as a
         -> SR_OFF
       (RESET, SR_OFF) ->
-        a = 0 then a as 1
+        a = 0 then 1 as a
         -> SR_ON
       // Set
       toggle as {a:1} -> SET
