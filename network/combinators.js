@@ -170,18 +170,20 @@ network.combinators = (function(){
     
     /** @Override */
     initElements() {
-      utils.createHtmlElement(this.thumbnail, 'div', ['operator'], this.operator);
-      utils.createHtmlElement(
-        this.detail, 'span', htmlClassListForSignal_(this.left), this.left);
-      this.detail.innerHTML += ' ';
-      utils.createHtmlElement(this.detail, 'span', ['operator'], this.operator);
-      this.detail.innerHTML += ' ';
-      utils.createHtmlElement(
-        this.detail, 'span', htmlClassListForSignal_(this.right), this.right);
-      utils.createHtmlElement(this.detail, 'span', ['as'], ' as ');
-      utils.createHtmlElement(
-        this.detail, 'span', htmlClassListForSignal_(this.outputSignal),
-        this.outputSignal);
+      for (const elem of [this.thumbnail, this.detail]) {
+        utils.createHtmlElement(
+          elem, 'span', ['left'].concat(htmlClassListForSignal_(this.left)), this.left);
+        elem.innerHTML += ' ';
+        utils.createHtmlElement(elem, 'span', ['operator'], this.operator);
+        elem.innerHTML += ' ';
+        utils.createHtmlElement(
+            elem, 'span', ['right'].concat(htmlClassListForSignal_(this.right)),
+            this.right);
+        utils.createHtmlElement(
+            utils.createHtmlElement(
+                elem, 'span', ['output'], ' as '),
+            'span', htmlClassListForSignal_(this.outputSignal), this.outputSignal);
+      }
     }
   }
   
@@ -255,24 +257,21 @@ network.combinators = (function(){
     
     /** @Override */
     initElements() {
-      utils.createHtmlElement(this.thumbnail, 'div', ['operator'], this.operator);
-      utils.createHtmlElement(
-          this.detail, 'span', htmlClassListForSignal_(this.left),
-          this.left);
-      this.detail.innerHTML += ' ';
-      utils.createHtmlElement(this.detail, 'span', ['operator'], this.operator);
-      this.detail.innerHTML += ' ';
-      utils.createHtmlElement(
-          this.detail, 'span', htmlClassListForSignal_(this.right),
-          this.right);
-      utils.createHtmlElement(this.detail, 'span', ['then'], ' then ');
-      if (this.asOne) {
+      for (const elem of [this.thumbnail, this.detail]) {
         utils.createHtmlElement(
-            this.detail, 'span', ['as'], '1 as ');
+            elem, 'span', ['left'].concat(htmlClassListForSignal_(this.left)),
+            this.left);
+        elem.innerHTML += ' ';
+        utils.createHtmlElement(elem, 'span', ['operator'], this.operator);
+        elem.innerHTML += ' ';
+        utils.createHtmlElement(
+            elem, 'span', ['right'].concat(htmlClassListForSignal_(this.right)),
+            this.right);
+        utils.createHtmlElement(
+            utils.createHtmlElement(
+                elem, 'span', ['output'], this.asOne ? ' then 1 as ' : ' then '),
+            'span', htmlClassListForSignal_(this.outputSignal), this.outputSignal);
       }
-      utils.createHtmlElement(
-          this.detail, 'span', htmlClassListForSignal_(this.outputSignal),
-          this.outputSignal);
     }
   }
   
@@ -415,7 +414,7 @@ network.combinators = (function(){
     initElements() {
       for (const elem of [this.thumbnail, this.detail]) {
         elem.classList.add('h' + this.level);
-        elem.textContent = this.text;
+        utils.createHtmlElement(elem, 'div', ['content'], this.text);
       }
     }
   }

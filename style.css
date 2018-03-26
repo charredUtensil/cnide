@@ -26,7 +26,7 @@ body {
   height: 48px;
   overflow: hidden;
   white-space: pre;
-  z-index: 6;
+  z-index: 9;
   box-shadow: 0 0 4px black;
   transition: background 0.3s ease-in-out; }
   .menu .btn {
@@ -140,7 +140,8 @@ body {
   margin: auto;
   padding: 20px 10%;
   box-sizing: border-box;
-  background: rgba(255, 0, 0, 0.8); }
+  background: rgba(255, 0, 0, 0.8);
+  z-index: 8; }
 
 /* Signals (common) */
 .value {
@@ -201,7 +202,7 @@ body {
     bottom: 48px;
     width: 220px;
     background: #444;
-    z-index: 4; }
+    z-index: 6; }
     @media screen and (max-width: 520px) {
       .network-wrapper .state-wrapper {
         left: 0;
@@ -225,7 +226,7 @@ body {
   .network-wrapper .detail-wrapper {
     display: table;
     position: absolute;
-    z-index: 5;
+    z-index: 7;
     left: 0;
     right: 0;
     bottom: 0;
@@ -257,7 +258,7 @@ body {
       .network-wrapper .network .segments.underlay {
         z-index: 1; }
       .network-wrapper .network .segments.overlay {
-        z-index: 3; }
+        z-index: 5; }
 
 /* Combinators */
 @keyframes pulse-selected {
@@ -268,8 +269,7 @@ body {
   100% {
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.25); } }
 .combinator {
-  box-sizing: border-box;
-  overflow: hidden; }
+  box-sizing: border-box; }
   .combinator .operator {
     font-weight: bold; }
   .combinator .button {
@@ -296,7 +296,28 @@ body {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%); }
+    .combinator.thumbnail .left, .combinator.thumbnail .right, .combinator.thumbnail .output {
+      display: none;
+      position: absolute;
+      font-size: 10px; }
+    @media screen and (min-width: 1024px) {
+      .combinator.thumbnail .left, .combinator.thumbnail .right, .combinator.thumbnail .output {
+        display: block;
+        overflow: hidden;
+        left: 15px;
+        right: 15px; }
+      .combinator.thumbnail .left {
+        top: 0;
+        line-height: 96px; }
+      .combinator.thumbnail .right {
+        top: 0;
+        line-height: 96px;
+        text-align: right; }
+      .combinator.thumbnail .output {
+        bottom: 5px;
+        text-align: center; } }
     .combinator.thumbnail .operator {
+      z-index: 4;
       font-size: 20px;
       text-align: center;
       background: #333;
@@ -304,7 +325,10 @@ body {
       width: 30px;
       line-height: 30px;
       border-radius: 5px;
-      border: 2px solid white; }
+      border: 2px solid white;
+      transition-property: color, border-color;
+      transition-duration: 0.3s;
+      transition-timing-function: ease-in-out; }
     .combinator.thumbnail::before {
       content: '';
       border-radius: 5px;
@@ -312,10 +336,15 @@ body {
       top: 5px;
       bottom: 5px;
       left: 15px;
-      right: 15px; }
-    .combinator.thumbnail.selected::before {
-      box-shadow: 0 0 4px white;
-      animation: 5s pulse-selected infinite; }
+      right: 15px;
+      transition-property: background;
+      transition-duration: 0.3s;
+      transition-timing-function: ease-in-out; }
+    .combinator.thumbnail.selected {
+      z-index: 3; }
+      .combinator.thumbnail.selected::before {
+        box-shadow: 0 0 4px white;
+        animation: 5s pulse-selected infinite; }
     .combinator.thumbnail.constant .signal, .combinator.thumbnail.constant .value, .combinator.thumbnail.toggle .signal, .combinator.thumbnail.toggle .value, .combinator.thumbnail.pulse .signal, .combinator.thumbnail.pulse .value, .combinator.thumbnail.display .signal, .combinator.thumbnail.display .value {
       position: absolute;
       left: 15px;
@@ -348,8 +377,13 @@ body {
   .combinator.constant.thumbnail .operator {
     border-color: black;
     color: black; }
+  .combinator.constant.thumbnail.selected::before {
+    background: #790905; }
+  .combinator.constant.thumbnail.selected .operator {
+    border-color: black;
+    color: black; }
   .combinator.constant.detail {
-    background: #610704; }
+    background: #790905; }
     .combinator.constant.detail .operator {
       color: black; }
   .combinator.pulse.thumbnail::before {
@@ -357,8 +391,13 @@ body {
   .combinator.pulse.thumbnail .operator {
     border-color: black;
     color: black; }
+  .combinator.pulse.thumbnail.selected::before {
+    background: #515151; }
+  .combinator.pulse.thumbnail.selected .operator {
+    border-color: black;
+    color: black; }
   .combinator.pulse.detail {
-    background: #444; }
+    background: #515151; }
     .combinator.pulse.detail .operator {
       color: black; }
   .combinator.pulse .button .icon.active {
@@ -368,8 +407,13 @@ body {
   .combinator.pulse.active.thumbnail .operator {
     border-color: black;
     color: black; }
+  .combinator.pulse.active.thumbnail.selected::before {
+    background: #790905; }
+  .combinator.pulse.active.thumbnail.selected .operator {
+    border-color: black;
+    color: black; }
   .combinator.pulse.active.detail {
-    background: #610704; }
+    background: #790905; }
     .combinator.pulse.active.detail .operator {
       color: black; }
   .combinator.pulse.active .button .icon.active {
@@ -381,8 +425,13 @@ body {
   .combinator.toggle.thumbnail .operator {
     border-color: black;
     color: black; }
+  .combinator.toggle.thumbnail.selected::before {
+    background: #515151; }
+  .combinator.toggle.thumbnail.selected .operator {
+    border-color: black;
+    color: black; }
   .combinator.toggle.detail {
-    background: #444; }
+    background: #515151; }
     .combinator.toggle.detail .operator {
       color: black; }
   .combinator.toggle .button {
@@ -401,8 +450,13 @@ body {
   .combinator.toggle.active.thumbnail .operator {
     border-color: black;
     color: black; }
+  .combinator.toggle.active.thumbnail.selected::before {
+    background: #790905; }
+  .combinator.toggle.active.thumbnail.selected .operator {
+    border-color: black;
+    color: black; }
   .combinator.toggle.active.detail {
-    background: #610704; }
+    background: #790905; }
     .combinator.toggle.active.detail .operator {
       color: black; }
   .combinator.toggle.active .button::after {
@@ -412,8 +466,13 @@ body {
   .combinator.pole.thumbnail .operator {
     border-color: black;
     color: black; }
+  .combinator.pole.thumbnail.selected::before {
+    background: #515151; }
+  .combinator.pole.thumbnail.selected .operator {
+    border-color: black;
+    color: black; }
   .combinator.pole.detail {
-    background: #444; }
+    background: #515151; }
     .combinator.pole.detail .operator {
       color: black; }
   .combinator.arithmetic.thumbnail::before {
@@ -421,8 +480,13 @@ body {
   .combinator.arithmetic.thumbnail .operator {
     border-color: #443d22;
     color: #443d22; }
+  .combinator.arithmetic.thumbnail.selected::before {
+    background: #294967; }
+  .combinator.arithmetic.thumbnail.selected .operator {
+    border-color: #ff3;
+    color: #ff3; }
   .combinator.arithmetic.detail {
-    background: #223c55; }
+    background: #294967; }
     .combinator.arithmetic.detail .operator {
       color: #ff3; }
   .combinator.decider.thumbnail::before {
@@ -430,8 +494,13 @@ body {
   .combinator.decider.thumbnail .operator {
     border-color: #252;
     color: #252; }
+  .combinator.decider.thumbnail.selected::before {
+    background: #554c2b; }
+  .combinator.decider.thumbnail.selected .operator {
+    border-color: #3e3;
+    color: #3e3; }
   .combinator.decider.detail {
-    background: #443d22; }
+    background: #554c2b; }
     .combinator.decider.detail .operator {
       color: #3e3; }
   .combinator.display.thumbnail::before {
@@ -439,11 +508,16 @@ body {
   .combinator.display.thumbnail .operator {
     border-color: black;
     color: black; }
+  .combinator.display.thumbnail.selected::before {
+    background: #296729; }
+  .combinator.display.thumbnail.selected .operator {
+    border-color: black;
+    color: black; }
   .combinator.display.detail {
-    background: #252; }
+    background: #296729; }
     .combinator.display.detail .operator {
       color: black; }
-  @media screen and (min-width: 800px) {
+  @media screen and (min-width: 1024px) {
     .combinator.display.thumbnail .value {
       font-size: 18px;
       line-height: 100%; } }
@@ -452,10 +526,19 @@ body {
     padding-left: 20px; }
   .combinator.label {
     white-space: pre-line; }
-    .combinator.label.thumbnail::before {
-      display: none; }
+    .combinator.label.thumbnail {
+      word-break: break-all; }
+      .combinator.label.thumbnail .content {
+        overflow: hidden;
+        position: absolute;
+        top: 5px;
+        bottom: 5px;
+        left: 15px;
+        right: 15px; }
+      .combinator.label.thumbnail.selected::before {
+        background: #123; }
     .combinator.label.detail {
-      background: #333;
+      background: #123;
       padding: 10px 5px; }
     .combinator.label.h1 {
       font-size: 18px;

@@ -24,6 +24,7 @@
   
   TESTS.parser_notParsesNothing = () => { assertNotParses(''); };
   TESTS.parser_parsesEmptyMain = () => { assertParses(m(''), 0); };
+  
   TESTS.parser_parsesComments = () => { assertParses(m('// comment\n'), 0); };
   TESTS.parser_parsesCommentsOutsideMain = () => {
     assertParses('// comment\n' + m('') + '//comment', 0); };
@@ -37,4 +38,8 @@
     assertParses(m(
         '/* comment *//* comment */{x:/* comment */1/* comment */}\n' +
         '/* comment */->/* comment */W/* comment */'), 1); };
+        
+  TESTS.parser_notParsesUnsegmentable = () => {
+    assertNotParses(m('(A, B) -> x + 0 as x -> (B, C)\n{x: 1} -> (A, C)'));
+  }
 })();

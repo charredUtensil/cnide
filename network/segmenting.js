@@ -5,11 +5,10 @@ network.segmenting = (function(){
    */
   const CLIQUE_SIZE = 5;
   
-  /** The distance between poles. */
+  /** The max distance between poles. */
   const POLE_DISTANCE = 8;
   
   const WIRE_INSET = 20;
-  const SVG_COLORS = {red: 'red', green: 'green'}
   
   class SegmentingError extends Error {}
   
@@ -29,13 +28,6 @@ network.segmenting = (function(){
       this.from = from;
       this.to = to;
     }
-    
-    getColorAttr(active) {
-      if (!active) {
-        return '#444';
-      }
-      return SVG_COLORS[this.color];
-    }
   }
   
   /** Returns an array of up to 4 WireConnections bound to this combinator. */
@@ -54,14 +46,6 @@ network.segmenting = (function(){
     return results;
   }
   
-  /** A set of wires which are all the same color. */
-  class SameColorWires_ {
-    constructor(wires) {
-      this.set = new Set(wires);
-      this.opposite = null;
-    }
-  }
-  
   /**
    * Computes colors for all wires.
    * N.B. A better algorithm would be to collect all pairs, construct a graph,
@@ -70,8 +54,8 @@ network.segmenting = (function(){
    */
   class WireColorCalculator {
     constructor() {
-      // SameColorWires keyed by their member wires
-      this.scs_ = {};
+      this.groups_ = {};
+      this.opposites_ = {};
       this.addOppositePair_('.red', '.green');
     }
     
@@ -105,13 +89,22 @@ network.segmenting = (function(){
      */
     getColors() {
       const wire_colors = {};
-      for(const i of ['.red'].concat(Object.keys(this.scs_))) {
+      for(const i of ['.red'].concat(Object.keys(this.groups_))) {
         if (!wire_colors[i]) {
-          for (const j of this.scs_[i].set.keys()) {
+          for (const j of this.groups_[i].keys()) {
+            if (wire_colors[j]) {
+              throw new Error('Wire sets not deduped properly');
+            }
             wire_colors[j] = 'red'; 
           }
-          for (const j of this.scs_[i].opposite.set.keys()) {
-            wire_colors[j] = 'green'; 
+          const o = this.groups_[this.opposites_[i]];
+          if (o) {
+            for (const j of o.keys()) {
+              if (wire_colors[j]) {
+                throw new Error('Wire sets not deduped properly');
+              }
+              wire_colors[j] = 'green'; 
+            }
           }
         }
       }
@@ -121,9 +114,8 @@ network.segmenting = (function(){
     }
     
     addSingleWire_(wire) {
-      if (!this.scs_[wire]) {
-        this.scs_[wire] = new SameColorWires_([wire]);
-        this.scs_[wire].opposite = new SameColorWires_([]);
+      if (!this.groups_[wire]) {
+        this.groups_[wire] = new Set([wire]);
       }
     }
     
@@ -132,10 +124,10 @@ network.segmenting = (function(){
       this.addSingleWire_(b);
       
       try {
-        this.merge_(this.scs_[a], this.scs_[b].opposite);
-        this.scs_[b].opposite = this.scs_[a];
-        this.merge_(this.scs_[b], this.scs_[a].opposite);
-        this.scs_[a].opposite = this.scs_[b];
+        this.merge_(a, this.opposites_[b]);
+        this.merge_(b, this.opposites_[a]);
+        this.opposites_[b] = a;
+        this.opposites_[a] = b;
       } catch (e) {
         if (e instanceof SegmentingError) {
           throw new SegmentingError(
@@ -148,24 +140,23 @@ network.segmenting = (function(){
     }
     
     /**
-     * Merges two SameColorWires into one SameColorWires.
+     * Moves everything from the group w1 is in to the group w2 is in.
      */
-    merge_(sc1, sc2) {
-      if (sc1 == sc2) { return; }
-      if (sc1.set.size < sc2.set.size) {
-        this.reallyMerge_(sc2, sc1);
-      } else {
-        this.reallyMerge_(sc1, sc2);
+    merge_(w1, w2) {
+      if (!w1 || !w2) {
+        return;
       }
-    }
-    
-    reallyMerge_(sc1, sc2) {
-      for (const w of sc2.set.keys()) {
-        if (sc1.opposite.set.has(w)) {
+      const g1 = this.groups_[w1];
+      const g2 = this.groups_[w2];
+      if (g1 == g2) {
+        return;
+      }
+      for (const w of g1.keys()) {
+        if (this.groups_[this.opposites_[w]] == g2) {
           throw new SegmentingError('Can\'t merge');
         }
-        sc1.set.add(w);
-        this.scs_[w] = sc1;
+        g2.add(w);
+        this.groups_[w] = g2;
       }
     }
   }
@@ -173,6 +164,7 @@ network.segmenting = (function(){
   /** A renderable representation of all wire segments in a circuit network. */
   class Segmenter_ {
     constructor() {
+      this.hasParsed = false;
       // positions will change as poles are inserted, but
       // will be stable up to the point the wires have
       // been added.
@@ -180,6 +172,10 @@ network.segmenting = (function(){
       // This will contain WireSegment objects for the individual
       // connections.
       this.wireSegments = [];
+      // wires will contain a map of wire names to lists
+      // of combinators using that wire.
+      this.wires = {};
+      this.wireIndexes = {};
     }
     
     hDistance_(index, connection, nextConnection) {
@@ -188,79 +184,115 @@ network.segmenting = (function(){
           (Math.floor(index / CLIQUE_SIZE) * 2 + connection.hOffset);
     }
     
+    needsPole_(previous, current) {
+      if (!previous) { return false; }
+      for (const conn of getConnections_(previous)) {
+        const wi = this.wireIndexes[conn.wire];
+        if (wi == 0) { continue; } // Ignore the first combinator.
+        const w = this.wires[conn.wire];
+        if (!w[wi] || w[wi].combinator == current || w[wi - 1].combinator != previous) {
+          continue;
+        }
+        // At this point, we are certain that previous is a combinator
+        // which came the max distance before this and has at least one connection to
+        // a combinator after this point. Therefore, a pole is needed.
+        return true;
+      }
+      return false;
+    }
+    
     parseNetwork(cn, colors) {
-      this.positions_ = [];
-      // wires will contain a map of wire names to lists
-      // of the index of the combinator in positions, for any wires
-      // whose segments haven't been placed yet.
-      const wires = {};
+      if (this.hasParsed) {
+        throw new Error("This segmenter has already parsed a network.");
+      }
+      this.hasParsed = true;
       for (const combinator of cn.children) {
         this.positions_.push(combinator);
         for (const conn of getConnections_(combinator)) {
-          wires[conn.wire] = wires[conn.wire] || [];
-          wires[conn.wire].push(conn);
+          this.wires[conn.wire] = this.wires[conn.wire] || [];
+          this.wireIndexes[conn.wire] = 0;
+          this.wires[conn.wire].push(conn);
         }
       }
+      
+      let recentPoles = [];
+      // TODO: Could probably resolve this as above
+      let recentPolesWires = new Set();
       for (let i = 0; i < this.positions_.length; i++) {
-        const combinator = this.positions_[i];
-        combinator.xPos =
-            Math.floor(i / CLIQUE_SIZE) % 2 == 0 ?
-            i % CLIQUE_SIZE :
-            CLIQUE_SIZE - (i % CLIQUE_SIZE) - 1;
-        combinator.yPos = Math.floor(i / CLIQUE_SIZE) * 2;
-        let needPole = false;
-        for (const conn of getConnections_(combinator)) {
-          const nextConnection = wires[conn.wire][1];
-          if (!nextConnection) { continue; }
-          if (this.hDistance_(i, conn, nextConnection) > CLIQUE_SIZE) {
-            // The next combinator may be too far to connect, so add a pole.
-            needPole = true;
-            break;
-          } else {
-            // Can't connect the combinator yet. It might be bumped by another
-            // wire adding a pole.
-          }
+        // Start by looking at the combinators that are about to go out of range and add
+        // a pole to extend their range. There is probably a better algorithm for this,
+        // but I haven't found one that isn't unreasonably buggy.
+        const previous = this.positions_[i - CLIQUE_SIZE * Math.floor(CLIQUE_SIZE / 2)];
+        if (recentPoles[0] && previous == recentPoles[0]) {
+          // We are too far away from the previous pole to use it any more.
+          recentPoles.shift();
+          recentPolesWires = new Set(
+              recentPoles
+                  .reduce((r, p) => r.concat(p.inputs)
+                  .concat(p.outputs), []))
         }
-        if (needPole) {
-          const pole = new network.combinators.Pole(combinator.inputs, combinator.outputs);
+        if (this.needsPole_(previous, this.positions_[i])) {
+          if (recentPoles.length > CLIQUE_SIZE * CLIQUE_SIZE / 2) {
+            // Infinite loop detected.
+            throw new SegmentingError('The network is too complex. Try moving relevant combinators closer together.');
+          }
+          let poleWires = (
+              Array.from(new Set(previous.inputs.concat(previous.outputs)))
+                  .filter(w => this.wireIndexes[w] < this.wires[w].length)
+                  .filter(w => !recentPolesWires.has(w)));
+          for (let ri = 0; ri <  recentPoles.length; ri++) {
+            const rPole = recentPoles[ri];
+            const pw = new Set(poleWires.concat(rPole.inputs).concat(rPole.outputs));
+            if (pw.size > 4) { continue; }
+            const reds = Array.from(pw).reduce(
+                (r, w) => colors[w] == 'red' ? r + 1 : r, 0);
+            if (reds > 2 || (pw.size - reds) > 2) { continue; }
+            recentPoles.splice(ri, 1);
+            poleWires = Array.from(pw);
+            ri--;
+          }
+          poleWires = poleWires.sort();
+          for (const w of poleWires) {
+            recentPolesWires.add(w);
+          }
+          poleWires = [
+              poleWires.filter(w => colors[w] == 'red'),
+              poleWires.filter(w => colors[w] == 'green')];
+          // put that into the pole
+          
+          const pole = new network.combinators.Pole(
+              poleWires.map(p => p[0]).filter(w => !!w),
+              poleWires.map(p => p[1]).filter(w => !!w));
           cn.add(pole);
-          // First insert the pole into the overall positions obj. The pole is inserted so
-          // there are no gaps in coverage, so the next combinator (that the current one can't
-          // reach) is within or past this pole's range.
-          const poleIndex = i + CLIQUE_SIZE *
-              Math.floor((combinator instanceof network.combinators.Pole ?
-                          POLE_DISTANCE : CLIQUE_SIZE) / 2);
-          for (let j = this.positions_.length; j < poleIndex; j++) {
-            this.positions_[j] = new network.combinators.Label('');
+          this.positions_.splice(i, 0, pole);
+          for (const conn of getConnections_(pole)) {
+            const wi = this.wireIndexes[conn.wire];
+            this.wires[conn.wire].splice(wi, 0, conn);
           }
-          this.positions_.splice(poleIndex, 0, pole);
-          for (const conn of getConnections_(combinator)) {
-            const poleConn = new WireConnection(pole, conn.wire, conn.hOffset);
-            // Link the combinator to the pole.
-            this.wireSegments.push(new WireSegment(colors[conn.wire], conn, poleConn));
-            // Next insert the pole connections into all the wire queues at
-            // their correct positions.
-            let indexInQueue = 1;
-            for (let j = i; j < poleIndex && indexInQueue < wires[conn.wire].length;) {
-              if (this.positions_[j] == wires[conn.wire][indexInQueue].combinator) {
-                indexInQueue++;
-              } else {
-                j++;
-              }
-            }
-            wires[conn.wire].splice(indexInQueue, 0, poleConn);
-          }
+          recentPoles.push(pole);
         }
+        
+        // The combinator is in the correct place. Add its segments to the segment list.
+        const combinator = this.positions_[i];
+        combinator.rtl = Math.floor(i / CLIQUE_SIZE) % 2 != 0;
+        combinator.xPos =
+            combinator.rtl ?
+            CLIQUE_SIZE - (i % CLIQUE_SIZE) - 1 :
+            i % CLIQUE_SIZE;
+        combinator.yPos = Math.floor(i / CLIQUE_SIZE) * 2;
+        
+        // The direction of the next combinator in the list:
+        // 0 for down, 1 for right, and -1 to left
+        //combinator.nextDir = i % CLIQUE_SIZE == 0 ? 0 : rtl ? -1 : 1;
+        
         for (const conn of getConnections_(combinator)) {
-          if (wires[conn.wire].shift().combinator != combinator) {
+          const wi = this.wireIndexes[conn.wire]++;
+          if (wi == 0) { continue; } // Ignore the first combinator in the wire.
+          const w = this.wires[conn.wire];
+          if (w[wi].combinator != combinator) {
             throw new Error('Array for ' + conn.wire + ' is in the wrong order');
           }
-          const nextConnection = wires[conn.wire][0];
-          if (!nextConnection) { continue; }
-          if (this.hDistance_(i, conn, nextConnection) <= CLIQUE_SIZE) {
-            const ws = new WireSegment(colors[conn.wire], conn, nextConnection);
-            this.wireSegments.push(ws);
-          }
+          this.wireSegments.push(new WireSegment(colors[conn.wire], w[wi - 1], conn));
         }
       }
     }

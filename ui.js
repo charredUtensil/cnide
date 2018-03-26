@@ -87,7 +87,7 @@ const ui = (function(){
         const start = this.textarea.selectionStart;
         let indent = '\n';
         for (let i = v.lastIndexOf('\n', start - 1) + 1;
-             i < v.length && v[i] == ' '; i++) {
+             i < v.length && (v[i] == ' '); i++) {
           indent += ' ';
         }
         if (start || start == '0') {

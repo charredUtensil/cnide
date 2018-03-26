@@ -6,12 +6,12 @@
 }
 
 @mixin big {
-  @media screen and (min-width: 800px) {
+  @media screen and (min-width: 1024px) {
     @content;
   }
 }
 
-@mixin material-transition($properties) {
+@mixin material-transition($properties...) {
   transition-property: $properties;
   transition-duration: 0.3s;
   transition-timing-function: ease-in-out;
@@ -31,34 +31,39 @@ $combinator-op-font-size: 20px;
 $combinator-inset-x: 15px;
 $combinator-inset-y: 5px;
 
+$color-dark-grey: #333;
+$color-dark-red: #610704;
+$color-dark-blue: #223c55;
+$color-dark-yellow: #443d22;
+$color-dark-green: #252;
+
+$color-light-grey: #444;
+$color-light-red: #f55;
+$color-light-blue: #8be;
+$color-light-yellow: #ff3;
+$color-light-green: #3e3;
+
 $color-edit: #fff;
 $color-edit-bg: #123;
 $color-edit-menu: #fff;
 $color-edit-menu-bg: #00bcd4;
 $color-run-bg: #222;
 $color-run-menu: #e69100;
-$color-run-menu-bg: #333;
-$color-op-bg: #333;
-$color-op-bg-hover: #444;
-
-$color-dark-red: #610704;
-$color-dark-blue: #223c55;
-$color-dark-yellow: #443d22;
-$color-dark-green: #252;
-
-$color-light-red: #f55;
-$color-light-blue: #8be;
-$color-light-yellow: #ff3;
-$color-light-green: #3e3;
+$color-run-menu-bg: $color-dark-grey;
+$color-op-bg: $color-dark-grey;
+$color-op-bg-hover: $color-light-grey;
 
 $color-cta: $color-run-menu;
 
 $z-underlay: 1;
 $z-thumbnail: 2;
-$z-overlay: 3;
-$z-statepane: 4;
-$z-detail: 5;
-$z-menu: 6;
+$z-thumbnail-selected: 3;
+$z-thumbnail-op: 4;
+$z-overlay: 5;
+$z-statepane: 6;
+$z-detail: 7;
+$z-fatal-error-message: 8;
+$z-menu: 9;
 
 
 /* Generics and Reset */
@@ -239,6 +244,7 @@ body {
   padding: 20px 10%;
   box-sizing: border-box;
   background: rgba(255, 0, 0, 0.8);
+  z-index: $z-fatal-error-message;
 }
 
 
@@ -281,7 +287,7 @@ body {
     }
   }
   .tick, .wire {
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid $color-dark-grey;
   }  
   .signal-table {
     width: 100%;
@@ -315,7 +321,7 @@ body {
     right: 0;
     bottom: $menu-height;
     width: 220px;
-    background: #444;
+    background: $color-light-grey;
     z-index: $z-statepane;
     @include small {
       left: 0;
@@ -329,7 +335,7 @@ body {
       position: absolute;
       width: 100%;
       height: 10px;
-      background: linear-gradient(to bottom, #444 0%,rgba(0, 0, 0, 0) 100%);
+      background: linear-gradient(to bottom, $color-light-grey 0%,rgba(0, 0, 0, 0) 100%);
     }
     &::after {
       content: "";
@@ -337,7 +343,7 @@ body {
       width: 100%;
       height: 10px;
       bottom: 0;
-      background: linear-gradient(to top, #444 0%,rgba(0, 0, 0, 0) 100%);
+      background: linear-gradient(to top, $color-light-grey 0%,rgba(0, 0, 0, 0) 100%);
     }
   }
   .detail-wrapper {
@@ -393,9 +399,18 @@ body {
       border-color: $thumb-op;
       color: $thumb-op;
     }
+    &.selected {
+      &::before {
+        background: lighten($bg, 5%);
+      }
+      .operator {
+        border-color: $detail-op;
+        color: $detail-op;
+      }
+    }
   }
   &.detail {
-    background: $bg;
+    background: lighten($bg, 5%);
     .operator {
       color: $detail-op;
     }
@@ -416,7 +431,6 @@ body {
 
 .combinator {
   box-sizing: border-box;
-  overflow: hidden;
   
   .operator {
     font-weight: bold;
@@ -450,7 +464,34 @@ body {
       left: 50%;
       transform: translate(-50%, -50%);
     }
+    .left, .right, .output {
+      display: none;
+      position: absolute;
+      font-size: $font-size-tiny;
+    }
+    @include big {
+      .left, .right, .output {
+        display: block;
+        overflow: hidden;
+        left: $combinator-inset-x;
+        right: $combinator-inset-x;
+      }
+      .left {
+        top: 0;
+        line-height: $combinator-height;
+      }
+      .right {
+        top: 0;
+        line-height: $combinator-height;
+        text-align: right;
+      }
+      .output {
+        bottom: $combinator-inset-y;
+        text-align: center;
+      }
+    }
     .operator {
+      z-index: $z-thumbnail-op;
       font-size: $combinator-op-font-size;
       text-align: center;
       background: $color-op-bg;
@@ -459,6 +500,7 @@ body {
       line-height: $combinator-op-size;
       border-radius: 5px;
       border: 2px solid white;
+      @include material-transition(color, border-color);
     }  
     &::before {
       content: '';
@@ -468,10 +510,14 @@ body {
       bottom: $combinator-inset-y;
       left: $combinator-inset-x;
       right: $combinator-inset-x;
+      @include material-transition(background);
     }
-    &.selected::before {
-      box-shadow: 0 0 4px white;
-      animation: 5s pulse-selected infinite;
+    &.selected {
+      z-index: $z-thumbnail-selected;
+      &::before {
+        box-shadow: 0 0 4px white;
+        animation: 5s pulse-selected infinite;
+      }
     }
     &.constant, &.toggle, &.pulse, &.display {
       .signal, .value {
@@ -516,7 +562,7 @@ body {
     @include combinator-colors($color-dark-red, black, black);
   }
   &.pulse {
-    @include combinator-colors(#444, black, black);
+    @include combinator-colors($color-light-grey, black, black);
     .button .icon.active {
       display: none;
     }
@@ -533,7 +579,7 @@ body {
     }
   }
   &.toggle {
-    @include combinator-colors(#444, black, black);
+    @include combinator-colors($color-light-grey, black, black);
     .button {
       height: 2 * $combinator-op-size;
       &::after {
@@ -557,7 +603,7 @@ body {
     }
   }
   &.pole {
-    @include combinator-colors(#444, black, black);
+    @include combinator-colors($color-light-grey, black, black);
   }
   &.arithmetic {
     @include combinator-colors($color-dark-blue, $color-dark-yellow, $color-light-yellow);
@@ -582,11 +628,24 @@ body {
   }
   &.label {
     white-space: pre-line;
-    &.thumbnail::before {
-      display: none;
+    &.thumbnail {
+      word-break: break-all;
+      .content {
+        overflow: hidden;
+        position: absolute;
+        top: $combinator-inset-y;
+        bottom: $combinator-inset-y;
+        left: $combinator-inset-x;
+        right: $combinator-inset-x;
+      }
+      &.selected {
+        &::before {
+          background: $color-edit-bg;
+        }
+      }
     }
     &.detail {
-      background: #333;
+      background: $color-edit-bg;
       padding: 10px 5px;
     }
     &.h1 {

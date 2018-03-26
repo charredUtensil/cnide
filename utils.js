@@ -1,8 +1,8 @@
 const utils = (function(){
   const utils = {};
   
-  utils.MAX_INT =  2147483647;
-  utils.MIN_INT = -2147483647;
+  utils.MAX_INT = 0x7fffffff;
+  utils.MIN_INT = 0x80000000 & 0xffffffff;
   
   utils.createHtmlElement = function(parent, tag, classList, text) {
     const element = document.createElement(tag);

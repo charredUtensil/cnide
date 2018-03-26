@@ -133,14 +133,14 @@
   }
   
   class DeclareColorStatement {
-    constructor(location, wire, color) {
+    constructor(location, wireRef, color) {
       this.location = location;
-      this.wire = wire;
+      this.wireRef = wireRef;
       this.color = color;
     }
     
     bind(cn, bindings) {
-      cn.forceColor(this.wire, this.color);
+      cn.forceColor(this.wireRef.bind(bindings), this.color);
     }
   }
 }
@@ -182,6 +182,7 @@ ReservedWord
   / ButtonKind
   / As / Then
   / Declare
+  / MaxInt / MinInt
 
 // Network Name
 NetworkName "network name"
@@ -197,8 +198,26 @@ WirePair
   / "()" { return [] }
 
 // Operands
+MaxInt  "maxint" =  "maxint" { return 0x7fffffff; }
+MinInt "-maxint" = "-maxint" { return 0x80000000 & 0xffffffff; }
 Integer "integer"
-  = "-"? [0-9]+ { return parseInt(text(), 10); }
+  = "0x" x:[0-9a-fA-F]+ {
+      if (x.length > 8) {
+        error('32 bit integers can be at most 8 digits.');
+      }
+      return parseInt(x.join(''), 16) & 0xffffffff;
+    }
+  / "-"? [0-9]+ {
+      const x = parseInt(text(), 10);
+      const capped = x & 0xffffffff;
+      if (capped != x) {
+        error(x + ' is not a valid 32 bit signed integer, ' +
+              'and would be interpreted as ' + capped + '.');
+      }
+      return x;
+    }
+  / MaxInt
+  / MinInt
   
 Signal "signal"
   = !ReservedWord [a-z][a-z0-9_]* { return new SignalRef(text()); }
@@ -396,7 +415,7 @@ SubNetworkReference
 
 DeclareColor
   = Declare _ wire:Wire _ As _ color:("red"/"green") {
-      return new DeclareColorStatement(location(), wire, color)
+      return new DeclareColorStatement(location(), new WiresRef([wire]), color)
     }
   
 Label
