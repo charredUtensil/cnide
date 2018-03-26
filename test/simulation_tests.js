@@ -30,7 +30,7 @@
     
   const testSingleCombinator = function(combinator, expectedOutputSignals) {
     simulateAndAssertTests(
-        'Main(){ {a:4,b:13,c:612} -> IN IN -> ' + combinator + ' -> OUT }', 2,
+        'Main(){ {b:13,a:4,c:612} -> IN IN -> ' + combinator + ' -> OUT }', 2,
         { 'IN': { 'a': 4, 'b': 13, 'c': 612 },
           'OUT': expectedOutputSignals });
   }
@@ -141,21 +141,3 @@
     }`,
     1, { 'OMEGA': {'x': 42} });
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
