@@ -157,7 +157,7 @@ Copy these into the editor to try them out.
 
 ### SR Latch
 This is a direct implementation of the SR Latch example
-[from the wiki](https://wiki.factorio.com/Tutorial:Circuit-network_Cookbook#Latches).
+[from the wiki](https://wiki.factorio.com/Tutorial:Circuit_network_cookbook#Latches).
 Note that if this example is run, before either button is pressed the circuit will rapidly toggle between on and off.
 This is to be expected, as the same thing will happen in Factorio if all combinators are constructed at the same time.
 
